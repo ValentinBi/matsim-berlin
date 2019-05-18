@@ -4,7 +4,7 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 
-public class ConfigAdoptions {
+public class ConfigAdaptions {
 	public static void main(String[] args) {
 		String configfile = "./scenarios/berlin-v5.3-1pct/input/berlin-v5.3-1pct.config.xml";
 		
