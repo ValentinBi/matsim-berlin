@@ -26,6 +26,7 @@ public class Networkadaptions {
 		link.setCapacity(6000);
 		link.setFreespeed(22.222222); // = 80 km/h
 		link.setAllowedModes(allowedModes);
+		link.setNumberOfLanes(3);
 	}
 		
 	
