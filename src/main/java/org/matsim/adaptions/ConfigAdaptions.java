@@ -10,14 +10,14 @@ public class ConfigAdaptions {
 		
 		Config config = ConfigUtils.loadConfig(configfile);
 		
-		config.controler().setOutputDirectory("/home/valentin/MATSim/Berlin/output_adapted");
+		config.controler().setOutputDirectory("./output/output_adapted");
 		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 		config.controler().setFirstIteration(0);
 		config.controler().setLastIteration(500);
 		config.controler().setRunId("berlin-v5.3-1pct-A100");
-		config.network().setInputFile("/home/valentin/MATSim/Berlin/berlin-v5-A100-network.xml.gz");
+		config.network().setInputFile("./berlin-v5-A100-network.xml.gz");
 		
-		String newconfigfilename = "/home/valentin/MATSim/Berlin/berlin-v5.3-1pct-adapted.config.xml";
+		String newconfigfilename = "./input/berlin-v5.3-1pct-adapted.config.xml";
 		ConfigUtils.writeConfig(config, newconfigfilename);
 	}
 	

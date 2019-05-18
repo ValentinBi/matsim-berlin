@@ -31,9 +31,10 @@ public class NetworkAdaptions {
 		
 	
 	public static void main(String[] args) {
-
-		Path inputNetwork= Paths.get("/home/valentin/MATSim/Berlin/berlin-v5-network.xml.gz");
-		Path outputNetwork= Paths.get("/home/valentin/MATSim/Berlin/berlin-v5-A100-network.xml.gz");
+		Path inputNetwork= Paths.get("./input/berlin-v5-network.xml.gz");
+		//Path inputNetwork= Paths.get("/home/valentin/MATSim/Berlin/berlin-v5-network.xml.gz");
+		//Path inputNetwork= Paths.get("http://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.3-10pct/input/berlin-v5-network.xml.gz");
+		Path outputNetwork= Paths.get("./input/berlin-v5-A100-network.xml.gz");
 		Network network = NetworkUtils.createNetwork();
 
 		NetworkFactory factory = network.getFactory();
