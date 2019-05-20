@@ -52,6 +52,8 @@ public class NetworkAdaptions {
 		
 		Node ostkreuz = network.getNodes().get(Id.createNodeId("2395404884"));
 		
+		Node amTreptowerPark = network.getNodes().get(Id.createNodeId("20246103"));
+		
 
 		allowedModes.add(TransportMode.car);
 
@@ -86,10 +88,13 @@ public class NetworkAdaptions {
 		link8.setLength(1000);
 		linkSet.add(link8);
 		
+		Link link9 = factory.createLink(Id.createLinkId(160897), amTreptowerPark, treptowerParkSouthWest);
+		link8.setLength(76.34);
+		linkSet.add(link9);
+		
 		for (Link link: linkSet) {
 			addAttributes(link);
 			network.addLink(link);	
-			//TODO lanes
 		}	
 
 		new NetworkWriter(network).write(outputNetwork.toString());
