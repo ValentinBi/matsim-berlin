@@ -5,6 +5,7 @@ import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
@@ -51,6 +52,8 @@ public class NetworkAdaptions {
 		Node treptowerParkSouthWest = network.getNodes().get(Id.createNodeId("287932598"));
 		
 		Node ostkreuz = network.getNodes().get(Id.createNodeId("2395404884"));
+		
+		Node node1 = factory.createNode(Id.create("9000000000", Node.class), new Coord(4599089.059985, 5815695.864662));
 		
 		Node amTreptowerPark = network.getNodes().get(Id.createNodeId("20246103"));
 		
