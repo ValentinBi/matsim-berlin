@@ -16,19 +16,47 @@ import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 
+import jdk.javadoc.internal.doclets.formats.html.markup.Links;
+
 public class NetworkAdaptions {
 	
 
 
 	static Set<String> allowedModes = new HashSet<>();
 
-	private static void addAttributes(Link link) {
+	private static void setMotorwayAttributesAndAddLink(Link link, Network network) {
 		
 		link.setCapacity(6000);
 		link.setFreespeed(22.222222); // = 80 km/h
 		link.setAllowedModes(allowedModes);
 		link.setNumberOfLanes(3);
+		network.addLink(link);
 	}
+	
+
+	private static long getFirstFreeNodeId(Network network) {
+		long counter = Long.parseLong("1");
+		//System.out.println(network.getNodes().get(Id.createNodeId(counter)).getId());
+		while (!(network.getNodes().get(Id.createNodeId(counter)) == null)) {
+			counter ++;
+			//System.out.println(network.getNodes().get(Id.createNodeId(counter)));
+		}
+		System.out.println("NodeId: "+ counter);
+		return counter;
+		
+	}
+	
+	private static long getFirstFreeLinkId(Network network) {
+		long counter = Long.parseLong("1");
+		while (!(network.getLinks().get(Id.createLinkId(counter)) == null)) {
+			counter ++;
+			//System.out.println((network.getLinks().get(Id.createLinkId(counter))));
+		}
+		System.out.println("LinkID: "+ counter);
+		return counter;
+		
+	}
+		
 		
 	
 	public static void main(String[] args) {
@@ -59,7 +87,8 @@ public class NetworkAdaptions {
 		Node fromA113ToGrenzallee_b = network.getNodes().get(Id.createNodeId("254868141"));	
 			/* Node for Grenzallee-A100*/
 		Node fromGrenzalleeToA113_a = network.getNodes().get(Id.createNodeId("31390642"));
-		Node fromGrenzalleeToA113_b = factory.createNode(Id.create("900000000", Node.class), new Coord(4599089.059985, 5815695.864662));
+		Node fromGrenzalleeToA113_b = factory.createNode(Id.createNodeId(getFirstFreeNodeId(network)), new Coord(4599089.059985, 5815695.864662));
+		network.addNode(fromGrenzalleeToA113_b);
 		Node fromGrenzalleeToA113_c = network.getNodes().get(Id.createNodeId("27542427"));
 		//create additional node between node 27542427 and node 206191220 - cars can't drive to A100
 		
@@ -89,68 +118,68 @@ public class NetworkAdaptions {
 		allowedModes.add(TransportMode.car);
 
 		// create links
-		Set<Link> linkSet = new HashSet<Link>(); 
+		System.out.println("Creating Links..." );
 		
 		//(1) Connection to existing A100 (Verbindung zur bestehenden A100)
-		Link link1 = factory.createLink(Id.createLinkId(160889), grenzalleeNorthEast, sonnenalleeSouthEast);
+		Link link1 = factory.createLink(Id.createLinkId(getFirstFreeLinkId(network)), grenzalleeNorthEast, sonnenalleeSouthEast);
 		link1.setLength(1100); // length from : http://www.autobahnatlas-online.de/
-		linkSet.add(link1);
-		Link link2 = factory.createLink(Id.createLinkId(160890),  sonnenalleeSouthEast, grenzalleeNorthWest);
+		setMotorwayAttributesAndAddLink(link1, network);
+		Link link2 = factory.createLink(Id.createLinkId(getFirstFreeLinkId(network)),  sonnenalleeSouthEast, grenzalleeNorthWest);
 		link2.setLength(1100);
-		linkSet.add(link2);
+		setMotorwayAttributesAndAddLink(link2, network);
 		
 		//(2) Reopening of Grenzallee (Aufhebung Sperrung Grenzallee) - Creation of 2 links to reopen Grenzallee street
-		Link link10 = factory.createLink(Id.createLinkId(160898), grenzallee11, grenzallee21);
+		Link link10 = factory.createLink(Id.createLinkId(getFirstFreeLinkId(network)), grenzallee11, grenzallee21);
 		link10.setLength(280); //estimated with Via
-		linkSet.add(link10);
-		Link link11 = factory.createLink(Id.createLinkId(160899), grenzallee12, grenzallee22);
+		setMotorwayAttributesAndAddLink(link10, network);
+		Link link11 = factory.createLink(Id.createLinkId(getFirstFreeLinkId(network)), grenzallee12, grenzallee22);
 		link11.setLength(330); //estimated with Via
-		linkSet.add(link11);
+		setMotorwayAttributesAndAddLink(link11, network);
 		
 		//(3) HAS Grenzallee
-		Link link12 = factory.createLink(Id.createLinkId(160900), fromA113ToGrenzallee_a, fromA113ToGrenzallee_b);
+		Link link12 = factory.createLink(Id.createLinkId(getFirstFreeLinkId(network)), fromA113ToGrenzallee_a, fromA113ToGrenzallee_b);
 		link12.setLength(280); //estimated with Via
-		linkSet.add(link12);
+		setMotorwayAttributesAndAddLink(link12, network);
 			/*from Grenzallee-A113*/
-		Link link13 = factory.createLink(Id.createLinkId(160901), fromGrenzalleeToA113_a, fromGrenzalleeToA113_b);
+		Link link13 = factory.createLink(Id.createLinkId(getFirstFreeLinkId(network)), fromGrenzalleeToA113_a, fromGrenzalleeToA113_b);
 		link13.setLength(35); //estimated with Via
-		linkSet.add(link13);
-		Link link14 = factory.createLink(Id.createLinkId(160902), fromGrenzalleeToA113_b, fromGrenzalleeToA113_c);
+		setMotorwayAttributesAndAddLink(link13, network);
+		Link link14 = factory.createLink(Id.createLinkId(getFirstFreeLinkId(network)), fromGrenzalleeToA113_b, fromGrenzalleeToA113_c);
 		link14.setLength(280); //estimated with Via
-		linkSet.add(link14);
+		setMotorwayAttributesAndAddLink(link14, network);
 		
 		//(4) AS Sonnenallee
-		Link link3 = factory.createLink(Id.createLinkId(160891), sonnenalleeSouthEast, sonnenalleeNorthEast);
+		Link link3 = factory.createLink(Id.createLinkId(getFirstFreeLinkId(network)), sonnenalleeSouthEast, sonnenalleeNorthEast);
 		link3.setLength(20);
-		linkSet.add(link3);
-		Link link4 = factory.createLink(Id.createLinkId(160892), sonnenalleeNorthEast, sonnenalleeSouthEast);
+		setMotorwayAttributesAndAddLink(link3, network);
+		Link link4 = factory.createLink(Id.createLinkId(getFirstFreeLinkId(network)), sonnenalleeNorthEast, sonnenalleeSouthEast);
 		link4.setLength(20);
-		linkSet.add(link4);
+		setMotorwayAttributesAndAddLink(link4, network);
 		
 		//Part Sonnenallee - Treptower Park
-		Link link5 = factory.createLink(Id.createLinkId(160893), sonnenalleeSouthEast, treptowerParkSouthWest);
+		Link link5 = factory.createLink(Id.createLinkId(getFirstFreeLinkId(network)), sonnenalleeSouthEast, treptowerParkSouthWest);
 		link5.setLength(2000);
-		linkSet.add(link5);
-		Link link6 = factory.createLink(Id.createLinkId(160894), treptowerParkSouthWest, sonnenalleeSouthEast);
+		setMotorwayAttributesAndAddLink(link5, network);
+		Link link6 = factory.createLink(Id.createLinkId(getFirstFreeLinkId(network)), treptowerParkSouthWest, sonnenalleeSouthEast);
 		link6.setLength(2000);
-		linkSet.add(link6);
+		setMotorwayAttributesAndAddLink(link6, network);
 		
 		//(5) AS Treptower Park
-		Link link9 = factory.createLink(Id.createLinkId(160897), amTreptowerPark, treptowerParkSouthWest);
+		Link link9 = factory.createLink(Id.createLinkId(getFirstFreeLinkId(network)), amTreptowerPark, treptowerParkSouthWest);
 		link9.setLength(76.34);
-		linkSet.add(link9);
+		setMotorwayAttributesAndAddLink(link9, network);
 		//additional link to guarantee that drivers can turn left
-		Link link15 = factory.createLink(Id.createLinkId(160903), treptowerParkSouthWest, amTreptowerPark);
+		Link link15 = factory.createLink(Id.createLinkId(getFirstFreeLinkId(network)), treptowerParkSouthWest, amTreptowerPark);
 		link15.setLength(76.34);
-		linkSet.add(link15);
+		setMotorwayAttributesAndAddLink(link15, network);
 		
 		//Part Treptower Park - Ostkreuz
-		Link link7 = factory.createLink(Id.createLinkId(160895), treptowerParkSouthWest, ostkreuz);
+		Link link7 = factory.createLink(Id.createLinkId(getFirstFreeLinkId(network)), treptowerParkSouthWest, ostkreuz);
 		link7.setLength(1000);
-		linkSet.add(link7);
-		Link link8 = factory.createLink(Id.createLinkId(160896), ostkreuz, treptowerParkSouthWest);
+		setMotorwayAttributesAndAddLink(link7, network);
+		Link link8 = factory.createLink(Id.createLinkId(getFirstFreeLinkId(network)), ostkreuz, treptowerParkSouthWest);
 		link8.setLength(1000);
-		linkSet.add(link8);
+		setMotorwayAttributesAndAddLink(link8, network);
 		
 		//(6) AS Ostkreuz
 		
@@ -172,10 +201,6 @@ public class NetworkAdaptions {
 			//research link length
 
 		
-		for (Link link: linkSet) {
-			addAttributes(link);
-			network.addLink(link);	
-		}	
 
 		new NetworkWriter(network).write(outputNetwork.toString());
 	}
