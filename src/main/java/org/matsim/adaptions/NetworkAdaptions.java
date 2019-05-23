@@ -198,7 +198,8 @@ public class NetworkAdaptions {
 			/*create link between node "Frankfurter Allee Ring Center" and new node 27195097 */
 			//research link length
 
-		
+		// example for closing link (change to the desired linkId):
+		// network.getLinks().get(Id.createLinkId("16578")).setCapacity(0);
 
 		new NetworkWriter(network).write(outputNetwork.toString());
 	}
