@@ -483,7 +483,7 @@ public class NetworkAdaptions {
 		// network.getLinks().get(Id.createLinkId("16578")).setCapacity(0);
 
 		new NetworkWriter(network).write(outputNetwork.toString());
-		System.out.println("Networkadaptions written successfully!");
+		System.out.println("Network written successfully!");
 	}
 	
 }
