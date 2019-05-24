@@ -10,7 +10,7 @@ public class ConfigAdaptions {
 		
 		Config config = ConfigUtils.loadConfig(configfile);
 		
-		config.controler().setOutputDirectory("./output/output_adapted");
+		config.controler().setOutputDirectory("./../output/output_A100");
 		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 		config.controler().setFirstIteration(0);
 		config.controler().setLastIteration(500);
