@@ -28,6 +28,7 @@ public class RunBerlinAnalysis {
 
 	/**
 	 * @param args
+	 *
 	 */
 	public static void main(String[] args) {
 
@@ -86,7 +87,7 @@ public class RunBerlinAnalysis {
 		System.out.println(
 				"Total time in traffic of all persons policy case: " + policyCaseForAllTimeInTraffic + " hours");
 		System.out.println("Difference in time spent by all persons in traffic "
-				+ (baseCaseForAllTimeInTraffic - policyCaseForAllTimeInTraffic));
+				+ (baseCaseForAllTimeInTraffic - policyCaseForAllTimeInTraffic) + " hours");
 
 		System.out.println("==========================================================================");
 		System.out.println("Analysing the trip of affected agents");
@@ -119,14 +120,15 @@ public class RunBerlinAnalysis {
 		System.out
 				.println("Time spent in traffic by affectd agents - policy case " + policyCaseTimeInTraffic + " hours");
 		System.out.println("Difference in time spent by affected agents in traffic "
-				+ (baseCaseTimeInTraffic - policyCaseTimeInTraffic));
+				+ (baseCaseTimeInTraffic - policyCaseTimeInTraffic) + " hours");
 
 		System.out.println("==========================================================================");
 //		Iterator<Id<Person>> agents = agentTravelledOnLinkEventHandler.getPersonOnWatchedLinks().iterator();
-//		
-//		while(agents.hasNext()) {
-//			
-//			Id<Person> id = agents.next();
+//
+//		while (agents.hasNext()) {
+//
+//			String id = agents.next().toString();
+//
 //			System.out.println(id);
 //		}
 
