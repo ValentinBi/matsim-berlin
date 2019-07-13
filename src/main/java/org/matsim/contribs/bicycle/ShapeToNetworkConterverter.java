@@ -160,7 +160,7 @@ public class ShapeToNetworkConterverter {
 
 		// removeRepeatNodes(nodesToRemove);
 		Path output = Paths.get("./output");
-		new NetworkWriter(net).write(output.resolve("network_output.xml").toString());
+		new NetworkWriter(net).write(output.resolve("Y-Trasse_Vorzugstrasse.xml").toString());
 
 	}
 
