@@ -159,8 +159,8 @@ public class ShapeToNetworkConterverter {
 		}
 
 		// removeRepeatNodes(nodesToRemove);
-		Path output = Paths.get("D:/Scientific_Computing/work/shape file conversion/output");
-		new NetworkWriter(net).write(output.resolve("network1.xml").toString());
+		Path output = Paths.get("./output");
+		new NetworkWriter(net).write(output.resolve("network_output.xml").toString());
 
 	}
 
