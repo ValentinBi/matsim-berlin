@@ -24,6 +24,8 @@ import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
+import org.matsim.core.utils.geometry.CoordinateTransformation;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
 
@@ -33,191 +35,274 @@ import org.opengis.feature.simple.SimpleFeature;
  */
 public class ShapeToNetworkConterverter {
 
-	// private static String epsg = "EPSG:3006";
-	private static Path BERLIN_NETWORK = Paths.get("./input/berlin-v5-network.xml.gz");
+    // private static String epsg = "EPSG:3006";
+    private static Path BERLIN_NETWORK = Paths
+            .get("Z:/shapefile_conversion/input/be_5_network_with-pt-ride-freight.xml");
 
-	private final static String NETWORK_SHAPE_FILE = "./input/Y-Trasse_Vorzugstrasse.shp";
+    private final static String NETWORK_SHAPE_FILE = "Z:/svn repo/studies/asasidharan/Berlin_Radschnellwege/2019-06-25-from-thomas-richter/TOP12/TOP12.shp";
 
-	private static final String GRADIENT = "gradient";
-	private static final String AVERAGE_ELEVATION = "averageElevation";
-	private static final String SURFACE = "surface";
-	private static final String SMOOTHNESS = "smoothness";
-	private static final String CYCLEWAY = "cycleway";
-	private static final String WAY_TYPE = "type";
-	private static final String BICYCLE_INFRASTRUCTURE_SPEED_FACTOR = "bicycleInfrastructureSpeedFactor";
+    private static final String GRADIENT = "gradient";
+    private static final String AVERAGE_ELEVATION = "averageElevation";
+    private static final String SURFACE = "surface";
+    private static final String SMOOTHNESS = "smoothness";
+    private static final String CYCLEWAY = "cycleway";
+    private static final String WAY_TYPE = "type";
+    private static final String BICYCLE_INFRASTRUCTURE_SPEED_FACTOR = "bicycleInfrastructureSpeedFactor";
+    private final static CoordinateTransformation CT = TransformationFactory.getCoordinateTransformation("EPSG:3006",
+            "EPSG:31468");
+    // TransformationFactory.GK4
+    private static final Map<Id<Node>, Coord> coordinateMap = new ConcurrentHashMap<Id<Node>, Coord>();
 
-	private static final Map<Id<Node>, Coord> coordinateMap = new ConcurrentHashMap<Id<Node>, Coord>();
+    ArrayList<Coord> coordinateList = new ArrayList<Coord>();
+    ArrayList<Coord> duplicateCoordinates = new ArrayList<Coord>();
+    Set<Coord> coordSet = new HashSet<Coord>();
+    ArrayList<Set<Id<Node>>> nodePair = new ArrayList<Set<Id<Node>>>();
+    ArrayList<ArrayList<Link>> linksToChange = new ArrayList<ArrayList<Link>>();
+    Set<Id<Node>> nodesPair = new HashSet<Id<Node>>();
+    ArrayList<Link> linksToAdd = new ArrayList<Link>();
+    ArrayList<Link> newLinksToAdd = new ArrayList<Link>();
+    ArrayList<Node> newNodesToAdd = new ArrayList<Node>();
+    
 
-	ArrayList<Coord> coordinateList = new ArrayList<Coord>();
-	ArrayList<Coord> duplicateCoordinates = new ArrayList<Coord>();
-	Set<Coord> coordSet = new HashSet<Coord>();
-	ArrayList<ArrayList<Id<Node>>> nodePair = new ArrayList<ArrayList<Id<Node>>>();
-	ArrayList<ArrayList<Link>> linksToChange = new ArrayList<ArrayList<Link>>();
-	Set<Id<Node>> nodesToRemove = new HashSet<Id<Node>>();
+    Network net = NetworkUtils.createNetwork();
+    NetworkFactory fac = net.getFactory();
 
-	Network net = NetworkUtils.createNetwork();
-	NetworkFactory fac = net.getFactory();
+    // static Network berlinNet = NetworkUtils.createNetwork();
 
-	static Network berlinNet = NetworkUtils.createNetwork();
+    public static void main(String[] args) {
 
-	public static void main(String[] args) {
+        new ShapeToNetworkConterverter().create();
+    }
 
-		new ShapeToNetworkConterverter().create();
-	}
+    private void create() {
 
-	private void create() {
+        // new
+        // MatsimNetworkReader(berlinNet).readFile(BERLIN_NETWORK.toString());
+        new MatsimNetworkReader(net).readFile(BERLIN_NETWORK.toString());
+        ShapeFileReader reader = new ShapeFileReader();
+        Collection<SimpleFeature> features = reader.readFileAndInitialize(NETWORK_SHAPE_FILE);
+        ArrayList<Node> nodesToDelete = new ArrayList<Node>();
+        
+        for (SimpleFeature sf : features) {
 
-		new MatsimNetworkReader(berlinNet).readFile(BERLIN_NETWORK.toString());
+            ArrayList<Node> node = new ArrayList<Node>();
+            if (sf.getFeatureType() instanceof SimpleFeatureTypeImpl) {
+                System.out.println(sf.getAttribute("the_geom"));
+                String[] geom = sf.getAttribute("the_geom").toString().split("MULTILINESTRING");
+                String[] splitgeom = geom[1].split(",");
+                for (String rawcood : splitgeom) {
 
-		ShapeFileReader reader = new ShapeFileReader();
-		Collection<SimpleFeature> features = reader.readFileAndInitialize(NETWORK_SHAPE_FILE);
+                    String cood = rawcood.replaceAll("[\\[\\](){}]", "");
 
-		for (SimpleFeature sf : features) {
+                    String[] xy = cood.trim().split("\\s+");
+                    String x = xy[0];
+                    String y = xy[1];
+                    double x_double = Double.parseDouble(x);
+                    double y_double = Double.parseDouble(y);
 
-			ArrayList<Node> node = new ArrayList<Node>();
-			if (sf.getFeatureType() instanceof SimpleFeatureTypeImpl) {
-				System.out.println(sf.getAttribute(0));
-				String[] geom = sf.getAttribute(0).toString().split("MULTILINESTRING");
-				String[] splitgeom = geom[1].split(",");
-				for (String rawcood : splitgeom) {
+                    Coord coordinates = new Coord(x_double, y_double);
+                    Node newNode = fac.createNode(Id.createNodeId(getFirstFreeNodeId(net)), CT.transform(coordinates));
+                    node.add(newNode);
+                    //allNodes.add(newNode);
+                    net.addNode(newNode);
+                    coordinateMap.put(newNode.getId(), CT.transform(coordinates));
+                    coordinateList.add(CT.transform(coordinates));
 
-					String cood = rawcood.replaceAll("[\\[\\](){}]", "");
+                }
 
-					String[] xy = cood.trim().split("\\s+");
-					String x = xy[0];
-					String y = xy[1];
-					double x_double = Double.parseDouble(x);
-					double y_double = Double.parseDouble(y);
+                createLink(node);
 
-					Coord coordinates = new Coord(x_double, y_double);
-					Node newNode = fac.createNode(Id.createNodeId(getFirstFreeNodeId(berlinNet, net)), coordinates);
-					node.add(newNode);
-					net.addNode(newNode);
-					coordinateMap.put(newNode.getId(), coordinates);
-					coordinateList.add(coordinates);
+            }
+        }
+        // finding the coordinates having multiple nodes.
+        for (Coord coor : coordinateList) {
+            if (!coordSet.add(coor)) {
+                duplicateCoordinates.add(coor);
+            }
+        }
+        // removing all the coordinates having a single node from coordinateMap
+        // so that the final coordinateMap contains only the coordinates having
+        // multiple nodes
+        for (Entry<Id<Node>, Coord> entry : coordinateMap.entrySet()) {
+            if (!duplicateCoordinates.contains(entry.getValue())) {
+                coordinateMap.remove(entry.getKey());
+            }
+        }
 
-				}
+        
+        Iterator<Id<Node>> keyItr3 = coordinateMap.keySet().iterator();
+        while (keyItr3.hasNext()) {
+            Id<Node> id = keyItr3.next();
+            Coord coor = coordinateMap.get(id);
+            System.out.println("Node id "+id+" "+"coordinate "+coor);
+        }
+        // getting the nodes in same coordinates
+        Iterator<Id<Node>> keyItr1 = coordinateMap.keySet().iterator();
 
-				createLink(node, berlinNet);
+        while (keyItr1.hasNext()) {
 
-			}
-		}
-		//finding the coordinates having multiple nodes.
-		for (Coord coor : coordinateList) {
-			if (!coordSet.add(coor)) {
-				duplicateCoordinates.add(coor);
-			}
-		}
-		//removing all the coordinates having a single node from coordinateMap so that the final coordinateMap contains only the coordinates having multiple nodes
-		for (Entry<Id<Node>, Coord> entry : coordinateMap.entrySet()) {
-			if (!duplicateCoordinates.contains(entry.getValue())) {
-				coordinateMap.remove(entry.getKey());
-			}
-		}
+            Id<Node> key1 = keyItr1.next();
+            Iterator<Id<Node>> keyItr2 = coordinateMap.keySet().iterator();
+            while (keyItr2.hasNext()) {
 
-		// getting the nodes in same coordinates
-		Iterator<Id<Node>> keyItr1 = coordinateMap.keySet().iterator();
+                Id<Node> key2 = keyItr2.next();
+                if (coordinateMap.get(key1).equals(coordinateMap.get(key2)) && key1 != key2) {
+                    //ArrayList<Id<Node>> nodes = new ArrayList<Id<Node>>();
+                    Set<Id<Node>> nodes = new HashSet<Id<Node>>();
 
-		while (keyItr1.hasNext()) {
+                    if(nodesPair.add(key1) && nodesPair.add(key2)){
+                        nodes.add(key1);
+                        nodes.add(key2);
+                        nodePair.add(nodes);
+                        System.out.println("pair " + key1 + " " + key2);
+                    }                    
+                }
+            }
+        }
 
-			Id<Node> key1 = keyItr1.next();
-			Iterator<Id<Node>> keyItr2 = coordinateMap.keySet().iterator();
-			while (keyItr2.hasNext()) {
+        
+        //remove the duplicate nodes completely and create a new link with new nodes
+        Iterator<Set<Id<Node>>> pair = nodePair.listIterator();
+        
+        while(pair.hasNext()){
+            Set<Id<Node>> nodeSet = pair.next();
+            Iterator<Id<Node>> eachNode = nodeSet.iterator();
+            while(eachNode.hasNext()){
+                Id<Node> nodeId = eachNode.next();
+                Node node = net.getNodes().get(nodeId);
+                nodesToDelete.add(node);
+                
+                Map<Id<Link>, ? extends Link> inlinks = node.getInLinks();
+                Iterator<Id<Link>> inLinksKeys = inlinks.keySet().iterator();
+                
+                Map<Id<Link>, ? extends Link> outlinks = node.getOutLinks();
+                Iterator<Id<Link>> outLinksKeys = outlinks.keySet().iterator();
+                
+                while(inLinksKeys.hasNext()){
+                    Id<Link> linkid = inLinksKeys.next();
+                    changeToNode(linkid);
+                }
+                
+                while(outLinksKeys.hasNext()){
+                    Id<Link> linkid = outLinksKeys.next();
+                    changeFromNode(linkid);
+                }
+                
+            }
+        }
 
-				Id<Node> key2 = keyItr2.next();
-				if (coordinateMap.get(key1).equals(coordinateMap.get(key2)) && key1 != key2) {
-					ArrayList<Id<Node>> nodes = new ArrayList<Id<Node>>();
-					nodes.add(key1);
-					nodes.add(key2);
-					nodePair.add(nodes);
-					System.out.println("pair " + key1 + " " + key2);
-				}
-			}
-		}
+        removeUnusedNodes(nodesToDelete);
+        // removeRepeatNodes(nodesToRemove);
+        Path output = Paths.get("Z:/shapefile_conversion/output");
+        new NetworkWriter(net).write(output.resolve("test.xml").toString());
 
-		// some coordinates are having multiple nodes, so reconnecting the to and from
-		// nodes
-		Iterator<ArrayList<Id<Node>>> duplicateNode = nodePair.iterator();
-		while (duplicateNode.hasNext()) {
+    }
 
-			ArrayList<Id<Node>> nodes = duplicateNode.next();
-			Iterator<Id<Link>> linkItr = net.getLinks().keySet().iterator();
-			while (linkItr.hasNext()) {
-				Id<Link> linkid = linkItr.next();
-				Link link = net.getLinks().get(linkid);
+    private void createLink(ArrayList<Node> node) {
 
-				if (nodes.contains(link.getFromNode().getId())) {
-					link.setFromNode(net.getNodes().get(nodes.get(0)));
-					nodesToRemove.add(nodes.get(1));
-				} else if (nodes.contains(link.getToNode().getId())) {
-					link.setToNode(net.getNodes().get(nodes.get(0)));
-					nodesToRemove.add(nodes.get(1));
-				}
+        int size = node.size();
 
-			}
+        for (int x = 0; x < size; x++) {
+            Node from = node.get(x);
+            if (x < size - 1) {
+                Node to = node.get(x + 1);
+                Link link = fac.createLink(Id.createLinkId(getFirstFreeLinkId(net)), from, to);
+                setLinkAttributes(link);
+                net.addLink(link);
+            }
 
-		}
+        }
 
-		// removeRepeatNodes(nodesToRemove);
-		Path output = Paths.get("./output");
-		new NetworkWriter(net).write(output.resolve("Y-Trasse_Vorzugstrasse.xml").toString());
+    }
 
-	}
+    private static long getFirstFreeNodeId(Network network) {
+        long counter = Long.parseLong("1");
+        while (!(network.getNodes().get(Id.createNodeId(counter)) == null)) {
+            counter++;
+        }
+        System.out.println("NodeId: " + counter);
+        return counter;
 
-	private void createLink(ArrayList<Node> node, Network berlinNet) {
+    }
 
-		int size = node.size();
+    private static long getFirstFreeLinkId(Network network) {
+        long counter = Long.parseLong("1");
+        while (!(network.getLinks().get(Id.createLinkId(counter)) == null)) {
+            counter++;
+        }
+        System.out.println("LinkID: " + counter);
+        return counter;
 
-		for (int x = 0; x < size; x++) {
-			Node from = node.get(x);
-			if (x < size - 1) {
-				Node to = node.get(x + 1);
-				Link link = fac.createLink(Id.createLinkId(getFirstFreeLinkId(berlinNet, net)), from, to);
-				setLinkAttributes(link);
-				net.addLink(link);
-			}
+    }
 
-		}
+    private static void setLinkAttributes(Link link) {
 
-	}
+        Set<String> allowedModes = new HashSet<>();
+        allowedModes.add("bicycle");
+        link.getAttributes().putAttribute(SURFACE, "asphalt");
+        link.getAttributes().putAttribute(BICYCLE_INFRASTRUCTURE_SPEED_FACTOR, 1.0);
+        link.setAllowedModes(allowedModes);
 
-	private static long getFirstFreeNodeId(Network baseNetwork, Network generatedNetwork) {
-		long counter = Long.parseLong("1");
-		while (!(baseNetwork.getNodes().get(Id.createNodeId(counter)) == null)
-				|| !(generatedNetwork.getNodes().get(Id.createNodeId(counter)) == null)) {
-			counter++;
-		}
-		System.out.println("NodeId: " + counter);
-		return counter;
+    }
 
-	}
+    private void removeUnusedNodes(ArrayList<Node> nodes) {
 
-	private static long getFirstFreeLinkId(Network baseNetwork, Network generatedNetwork) {
-		long counter = Long.parseLong("1");
-		while (!(baseNetwork.getLinks().get(Id.createLinkId(counter)) == null)
-				|| !(generatedNetwork.getLinks().get(Id.createLinkId(counter)) == null)) {
-			counter++;
-		}
-		System.out.println("LinkID: " + counter);
-		return counter;
+        Iterator<Node> nodeItr = nodes.iterator();
 
-	}
+        while (nodeItr.hasNext()) {
+            Node node = nodeItr.next();
 
-	private static void setLinkAttributes(Link link) {
+            //System.out.println("In link of "+node.getId()+" "+node.getInLinks().size() +" "+"Out link of "+node.getId()+" "+node.getOutLinks().size());
+            //if (node.getInLinks().size() == 0 && node.getOutLinks().size() == 0) {
+                net.removeNode(node.getId());
+                System.out.println("removing nodes....... "+node.getId());
+            //}
+        }
+        
+//        Iterator<Link> linkItr = linksToAdd.iterator();
+//        
+//        while(linkItr.hasNext()){
+//            Link link = linkItr.next();
+//            net.addLink(link);
+//        }
+    }
 
-		link.getAttributes().putAttribute(SURFACE, "asphalt");
-		link.getAttributes().putAttribute(BICYCLE_INFRASTRUCTURE_SPEED_FACTOR, 1.0);
-
-	}
-
-//	private void removeRepeatNodes(Set<Id<Node>> nodesToRemove2) {
-//		Iterator<Id<Node>> nodes = nodesToRemove2.iterator();
-//		
-//		while(nodes.hasNext()) {
-//			Id<Node> node = nodes.next();
-//			System.out.println("Removing node "+node);
-//			net.removeNode(node);
-//		}
-//	}
+    private void changeToNode(Id<Link> linkid){
+        
+        Node fromNode = net.getLinks().get(linkid).getFromNode();
+        Coord toCord = net.getLinks().get(linkid).getToNode().getCoord();
+        Node toNode = fac.createNode(Id.createNodeId(getFirstFreeNodeId(net)), toCord);
+        //newNodesToAdd.add(toNode);
+        net.addNode(toNode);
+        Link link = fac.createLink(Id.createLinkId(getFirstFreeLinkId(net)), fromNode, toNode);
+        setLinkAttributes(link);
+        net.addLink(link);
+        //newLinksToAdd.add(link);
+        
+    }
+    
+    
+private void changeFromNode(Id<Link> linkid){
+        
+        Node toNode = net.getLinks().get(linkid).getToNode();
+        Coord fromCord = net.getLinks().get(linkid).getFromNode().getCoord();
+        Node fromNode = fac.createNode(Id.createNodeId(getFirstFreeNodeId(net)), fromCord);
+        //newNodesToAdd.add(toNode);
+        net.addNode(fromNode);
+        Link link = fac.createLink(Id.createLinkId(getFirstFreeLinkId(net)), fromNode, toNode);
+        setLinkAttributes(link);
+        net.addLink(link);
+        //newLinksToAdd.add(link);
+        
+    }
+    // private void removeRepeatNodes(Set<Id<Node>> nodesToRemove2) {
+    // Iterator<Id<Node>> nodes = nodesToRemove2.iterator();
+    //
+    // while(nodes.hasNext()) {
+    // Id<Node> node = nodes.next();
+    // System.out.println("Removing node "+node);
+    // net.removeNode(node);
+    // }
+    // }
 
 }
