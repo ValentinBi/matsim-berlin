@@ -59,10 +59,6 @@ public class ShapeToNetworkConterverter {
     ArrayList<Set<Id<Node>>> nodePair = new ArrayList<Set<Id<Node>>>();
     ArrayList<ArrayList<Link>> linksToChange = new ArrayList<ArrayList<Link>>();
     Set<Id<Node>> nodesPair = new HashSet<Id<Node>>();
-    ArrayList<Link> linksToAdd = new ArrayList<Link>();
-    ArrayList<Link> newLinksToAdd = new ArrayList<Link>();
-    ArrayList<Node> newNodesToAdd = new ArrayList<Node>();
-    
 
     Network net = NetworkUtils.createNetwork();
     NetworkFactory fac = net.getFactory();
@@ -103,7 +99,6 @@ public class ShapeToNetworkConterverter {
                     Coord coordinates = new Coord(x_double, y_double);
                     Node newNode = fac.createNode(Id.createNodeId(getFirstFreeNodeId(net)), CT.transform(coordinates));
                     node.add(newNode);
-                    //allNodes.add(newNode);
                     net.addNode(newNode);
                     coordinateMap.put(newNode.getId(), CT.transform(coordinates));
                     coordinateList.add(CT.transform(coordinates));
@@ -147,7 +142,6 @@ public class ShapeToNetworkConterverter {
 
                 Id<Node> key2 = keyItr2.next();
                 if (coordinateMap.get(key1).equals(coordinateMap.get(key2)) && key1 != key2) {
-                    //ArrayList<Id<Node>> nodes = new ArrayList<Id<Node>>();
                     Set<Id<Node>> nodes = new HashSet<Id<Node>>();
 
                     if(nodesPair.add(key1) && nodesPair.add(key2)){
@@ -192,7 +186,7 @@ public class ShapeToNetworkConterverter {
         }
 
         removeUnusedNodes(nodesToDelete);
-        // removeRepeatNodes(nodesToRemove);
+
         Path output = Paths.get("Z:/shapefile_conversion/output");
         new NetworkWriter(net).write(output.resolve("test.xml").toString());
 
@@ -251,20 +245,10 @@ public class ShapeToNetworkConterverter {
 
         while (nodeItr.hasNext()) {
             Node node = nodeItr.next();
-
-            //System.out.println("In link of "+node.getId()+" "+node.getInLinks().size() +" "+"Out link of "+node.getId()+" "+node.getOutLinks().size());
-            //if (node.getInLinks().size() == 0 && node.getOutLinks().size() == 0) {
                 net.removeNode(node.getId());
                 System.out.println("removing nodes....... "+node.getId());
-            //}
         }
         
-//        Iterator<Link> linkItr = linksToAdd.iterator();
-//        
-//        while(linkItr.hasNext()){
-//            Link link = linkItr.next();
-//            net.addLink(link);
-//        }
     }
 
     private void changeToNode(Id<Link> linkid){
@@ -272,12 +256,10 @@ public class ShapeToNetworkConterverter {
         Node fromNode = net.getLinks().get(linkid).getFromNode();
         Coord toCord = net.getLinks().get(linkid).getToNode().getCoord();
         Node toNode = fac.createNode(Id.createNodeId(getFirstFreeNodeId(net)), toCord);
-        //newNodesToAdd.add(toNode);
         net.addNode(toNode);
         Link link = fac.createLink(Id.createLinkId(getFirstFreeLinkId(net)), fromNode, toNode);
         setLinkAttributes(link);
         net.addLink(link);
-        //newLinksToAdd.add(link);
         
     }
     
@@ -287,22 +269,11 @@ private void changeFromNode(Id<Link> linkid){
         Node toNode = net.getLinks().get(linkid).getToNode();
         Coord fromCord = net.getLinks().get(linkid).getFromNode().getCoord();
         Node fromNode = fac.createNode(Id.createNodeId(getFirstFreeNodeId(net)), fromCord);
-        //newNodesToAdd.add(toNode);
         net.addNode(fromNode);
         Link link = fac.createLink(Id.createLinkId(getFirstFreeLinkId(net)), fromNode, toNode);
         setLinkAttributes(link);
         net.addLink(link);
-        //newLinksToAdd.add(link);
         
     }
-    // private void removeRepeatNodes(Set<Id<Node>> nodesToRemove2) {
-    // Iterator<Id<Node>> nodes = nodesToRemove2.iterator();
-    //
-    // while(nodes.hasNext()) {
-    // Id<Node> node = nodes.next();
-    // System.out.println("Removing node "+node);
-    // net.removeNode(node);
-    // }
-    // }
 
 }
