@@ -41,7 +41,7 @@ public class NetworkMerger {
 	private static Network addBikeModeToExistingNetwork(Network network) {
 		Collection<? extends Link> links = network.getLinks().values();
 		for (Link link : links) {
-			if (link.getFreespeed()<=50/3.6){
+			if (!link.getAllowedModes().contains(TransportMode.bike) && link.getFreespeed()<=50/3.6 && !link.getAllowedModes().contains(TransportMode.pt)){
 				addBikeMode(link);
 			}
 		}
