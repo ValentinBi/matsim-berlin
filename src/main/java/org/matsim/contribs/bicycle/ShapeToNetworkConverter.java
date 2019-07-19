@@ -33,13 +33,14 @@ import org.opengis.feature.simple.SimpleFeature;
  * @author asasidharan
  *
  */
-public class ShapeToNetworkConterverter {
+public class ShapeToNetworkConverter {
 
 	// private static String epsg = "EPSG:3006";
 	private static Path BERLIN_NETWORK = Paths
-			.get("D:/Scientific_Computing/work/input/berlin-v5-network.xml.gz");
+			.get("./input/berlin-v5-network.xml.gz");
 
-	private final static String NETWORK_SHAPE_FILE = "D:/Scientific_Computing/work/svn/Berlin_Radschnellwege/2019-06-25-from-thomas-richter/TOP12/TOP12.shp";
+	//private final static String NETWORK_SHAPE_FILE = "./input/shapefiles/TOP12/TOP12.shp";
+	private static Path NETWORK_SHAPE_FILE = Paths.get("./input/shapefiles/TOP12/TOP12.shp");
 
 	private static final String GRADIENT = "gradient";
 	private static final String AVERAGE_ELEVATION = "averageElevation";
@@ -67,16 +68,16 @@ public class ShapeToNetworkConterverter {
 
 	public static void main(String[] args) {
 
-		new ShapeToNetworkConterverter().create();
+		new ShapeToNetworkConverter().create();
 	}
 
 	private void create() {
 
 		// new
-		new MatsimNetworkReader(berlinNet).readFile(BERLIN_NETWORK.toString());
+		//new MatsimNetworkReader(berlinNet).readFile(BERLIN_NETWORK.toString());
 		// new MatsimNetworkReader(net).readFile(BERLIN_NETWORK.toString());
 		ShapeFileReader reader = new ShapeFileReader();
-		Collection<SimpleFeature> features = reader.readFileAndInitialize(NETWORK_SHAPE_FILE);
+		Collection<SimpleFeature> features = reader.readFileAndInitialize(NETWORK_SHAPE_FILE.toString());
 		ArrayList<Node> nodesToDelete = new ArrayList<Node>();
 
 		for (SimpleFeature sf : features) {
@@ -188,9 +189,11 @@ public class ShapeToNetworkConterverter {
 		}
 
 		removeUnusedNodes(nodesToDelete);
+		
+		Path output = Paths.get("./input/");
 
-		Path output = Paths.get("D:/Scientific_Computing/work/shape file conversion/output");
-		new NetworkWriter(net).write(output.resolve("test.xml").toString());
+		//Path output = Paths.get("D:/Scientific_Computing/work/shape file conversion/output");
+		new NetworkWriter(net).write(output.resolve("shapefile_network.xml").toString());
 
 	}
 
