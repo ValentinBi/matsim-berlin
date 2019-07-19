@@ -15,9 +15,11 @@ import org.matsim.core.network.io.MatsimNetworkReader;
 
 public class NetworkMerger {
 
-	private static Path BERLIN_NETWORK = Paths
+	private static Path ORIGINAL_BERLIN_NETWORK = Paths
 			.get("./input/berlin-v5-network.xml.gz");
-	private static Path BIKE_NETWORK = Paths
+	private static Path BERLIN_WITH_BIKES = Paths
+			.get("./input/berlin-bike-basecase-network.xml.gz");
+	private static Path BIKE_HIGHWAYS_NETWORK = Paths
 			.get("./input/shapefile_network.xml");
 	static Network berlinNet = NetworkUtils.createNetwork();
 	static Network bikeNetwork = NetworkUtils.createNetwork();
@@ -25,13 +27,17 @@ public class NetworkMerger {
 	public static void main(String[] args) {
 		
 		
-		new MatsimNetworkReader(berlinNet).readFile(BERLIN_NETWORK.toString());
-		new MatsimNetworkReader(bikeNetwork).readFile(BIKE_NETWORK.toString());
+		new MatsimNetworkReader(berlinNet).readFile(ORIGINAL_BERLIN_NETWORK.toString());
+		
+		Network berlinBikeNet = addBikeModeToExistingNetwork(berlinNet);
+		new NetworkWriter(berlinBikeNet).write(BERLIN_WITH_BIKES.toString());
+		
+		new MatsimNetworkReader(bikeNetwork).readFile(BIKE_HIGHWAYS_NETWORK.toString());
 		BikeNetworkMerger merge = new BikeNetworkMerger(berlinNet);
 		Network mergedNetwork = merge.mergeBikeHighways(bikeNetwork);
-		NetworkMerger mrgr = new NetworkMerger();
+		//NetworkMerger mrgr = new NetworkMerger();
 		//addBikeModeToExistingNetwork(mergedNetwork);
-		mergedNetwork = addBikeModeToExistingNetwork(mergedNetwork);
+		//mergedNetwork = addBikeModeToExistingNetwork(mergedNetwork);
 		
 		Path output = Paths.get("./input/");
 		new NetworkWriter(mergedNetwork).write(output.resolve("mergedNetwork.xml.gz").toString());
