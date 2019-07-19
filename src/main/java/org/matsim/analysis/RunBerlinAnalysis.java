@@ -34,9 +34,9 @@ public class RunBerlinAnalysis {
 
 		// get the paths for the network and the events
 		Path networkpath = Paths.get("./input/berlin-v5-A100-network.xml.gz");
-		Path baseCaseEventsPath = Paths.get("D:/Scientific_Computing/Analysis/berlin-v5.3-1pct.output_events.xml.gz");
+		Path baseCaseEventsPath = Paths.get("./output/berlin-v5.3-1pct.output_events.xml.gz");
 		Path policyCaseEventsPath = Paths
-				.get("D:/Scientific_Computing/Analysis/berlin-v5.3-1pct-A100.350.events.xml.gz");
+				.get("./output/output_a100/it.350/berlin-v5.3-1pct-A100.350.events.xml.gz");
 
 		Set<Id<Link>> linksToWatch = getLinksFromFile("./input/addedLinks.txt");
 

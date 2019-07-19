@@ -30,14 +30,15 @@ public class NetworkMerger {
 		BikeNetworkMerger merge = new BikeNetworkMerger(berlinNet);
 		Network mergedNetwork = merge.mergeBikeHighways(bikeNetwork);
 		NetworkMerger mrgr = new NetworkMerger();
-		mrgr.addBikeModeToExistingNetwork(mergedNetwork);
-		//mergedNetwork = addBikeModeToExistingNetwork(mergedNetwork);
+		//addBikeModeToExistingNetwork(mergedNetwork);
+		mergedNetwork = addBikeModeToExistingNetwork(mergedNetwork);
 		
 		Path output = Paths.get("./input/");
 		new NetworkWriter(mergedNetwork).write(output.resolve("mergedNetwork.xml.gz").toString());
+		System.out.println("Merged Network file written.");
 	}
 	
-	private  Network addBikeModeToExistingNetwork(Network network) {
+	private static Network addBikeModeToExistingNetwork(Network network) {
 		Collection<? extends Link> links = network.getLinks().values();
 		for (Link link : links) {
 			if (link.getFreespeed()<=50/3.6){
