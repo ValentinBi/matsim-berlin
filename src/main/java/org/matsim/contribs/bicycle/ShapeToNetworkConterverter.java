@@ -37,9 +37,9 @@ public class ShapeToNetworkConterverter {
 
 	// private static String epsg = "EPSG:3006";
 	private static Path BERLIN_NETWORK = Paths
-			.get("Z:/shapefile_conversion/input/be_5_network_with-pt-ride-freight.xml");
+			.get("D:/Scientific_Computing/work/input/berlin-v5-network.xml.gz");
 
-	private final static String NETWORK_SHAPE_FILE = "Z:/svn repo/studies/asasidharan/Berlin_Radschnellwege/2019-06-25-from-thomas-richter/TOP12/TOP12.shp";
+	private final static String NETWORK_SHAPE_FILE = "D:/Scientific_Computing/work/svn/Berlin_Radschnellwege/2019-06-25-from-thomas-richter/TOP12/TOP12.shp";
 
 	private static final String GRADIENT = "gradient";
 	private static final String AVERAGE_ELEVATION = "averageElevation";
@@ -63,7 +63,7 @@ public class ShapeToNetworkConterverter {
 	Network net = NetworkUtils.createNetwork();
 	NetworkFactory fac = net.getFactory();
 
-	// static Network berlinNet = NetworkUtils.createNetwork();
+	static Network berlinNet = NetworkUtils.createNetwork();
 
 	public static void main(String[] args) {
 
@@ -73,8 +73,8 @@ public class ShapeToNetworkConterverter {
 	private void create() {
 
 		// new
-		// MatsimNetworkReader(berlinNet).readFile(BERLIN_NETWORK.toString());
-		new MatsimNetworkReader(net).readFile(BERLIN_NETWORK.toString());
+		new MatsimNetworkReader(berlinNet).readFile(BERLIN_NETWORK.toString());
+		// new MatsimNetworkReader(net).readFile(BERLIN_NETWORK.toString());
 		ShapeFileReader reader = new ShapeFileReader();
 		Collection<SimpleFeature> features = reader.readFileAndInitialize(NETWORK_SHAPE_FILE);
 		ArrayList<Node> nodesToDelete = new ArrayList<Node>();
@@ -97,9 +97,13 @@ public class ShapeToNetworkConterverter {
 					double y_double = Double.parseDouble(y);
 
 					Coord coordinates = new Coord(x_double, y_double);
+					// Node newNode = fac.createNode(Id.createNodeId(getFirstFreeNodeId(net)),
+					// CT.transform(coordinates));
 					Node newNode = fac.createNode(Id.createNodeId(getFirstFreeNodeId(net)), CT.transform(coordinates));
 					node.add(newNode);
 					net.addNode(newNode);
+//					coordinateMap.put(newNode.getId(), CT.transform(coordinates));
+//					coordinateList.add(CT.transform(coordinates));
 					coordinateMap.put(newNode.getId(), CT.transform(coordinates));
 					coordinateList.add(CT.transform(coordinates));
 
@@ -185,7 +189,7 @@ public class ShapeToNetworkConterverter {
 
 		removeUnusedNodes(nodesToDelete);
 
-		Path output = Paths.get("Z:/shapefile_conversion/output");
+		Path output = Paths.get("D:/Scientific_Computing/work/shape file conversion/output");
 		new NetworkWriter(net).write(output.resolve("test.xml").toString());
 
 	}
@@ -251,9 +255,10 @@ public class ShapeToNetworkConterverter {
 
 	private void changeToNode(Id<Link> linkid) {
 
+		Node toNode = null;
 		Node fromNode = net.getLinks().get(linkid).getFromNode();
 		Coord toCord = net.getLinks().get(linkid).getToNode().getCoord();
-		Node toNode = fac.createNode(Id.createNodeId(getFirstFreeNodeId(net)), toCord);
+		toNode = fac.createNode(Id.createNodeId(getFirstFreeNodeId(net)), toCord);
 		net.addNode(toNode);
 		createLink(fromNode, toNode);
 
@@ -261,9 +266,10 @@ public class ShapeToNetworkConterverter {
 
 	private void changeFromNode(Id<Link> linkid) {
 
+		Node fromNode = null;
 		Node toNode = net.getLinks().get(linkid).getToNode();
 		Coord fromCord = net.getLinks().get(linkid).getFromNode().getCoord();
-		Node fromNode = fac.createNode(Id.createNodeId(getFirstFreeNodeId(net)), fromCord);
+		fromNode = fac.createNode(Id.createNodeId(getFirstFreeNodeId(net)), fromCord);
 		net.addNode(fromNode);
 		createLink(fromNode, toNode);
 
