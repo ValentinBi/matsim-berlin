@@ -73,7 +73,7 @@ public class ShapeToNetworkConterverter {
 	private void create() {
 
 		// new
-		new MatsimNetworkReader(berlinNet).readFile(BERLIN_NETWORK.toString());
+		//new MatsimNetworkReader(berlinNet).readFile(BERLIN_NETWORK.toString());
 		// new MatsimNetworkReader(net).readFile(BERLIN_NETWORK.toString());
 		ShapeFileReader reader = new ShapeFileReader();
 		Collection<SimpleFeature> features = reader.readFileAndInitialize(NETWORK_SHAPE_FILE);
