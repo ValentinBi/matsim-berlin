@@ -54,7 +54,7 @@ public class NetworkMerger {
 		Set<String> newAllowedModes = new HashSet<String>();
 		newAllowedModes.add(TransportMode.bike);
 		newAllowedModes.addAll(allowedModes);
-		link.setAllowedModes(allowedModes);
+		link.setAllowedModes(newAllowedModes);
 		link.getAttributes().putAttribute(BikeLinkSpeedCalculator.BIKE_SPEED_FACTOR_KEY, 0.5);
 	}
 
