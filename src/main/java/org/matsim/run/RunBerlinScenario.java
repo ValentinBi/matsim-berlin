@@ -26,6 +26,8 @@ import org.matsim.analysis.ScoreStats;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Population;
+import org.matsim.contribs.bicycle.BikeLinkSpeedCalculator;
+import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.config.ConfigUtils;
@@ -34,7 +36,13 @@ import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryLogging;
+import org.matsim.core.mobsim.qsim.AbstractQSimModule;
+import org.matsim.core.mobsim.qsim.qnetsimengine.ConfigurableQNetworkFactory;
+import org.matsim.core.mobsim.qsim.qnetsimengine.QNetworkFactory;
 import org.matsim.core.scenario.ScenarioUtils;
+
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
 
@@ -104,6 +112,24 @@ public class RunBerlinScenario {
 				addTravelDisutilityFactoryBinding( TransportMode.ride ).to( carTravelDisutilityFactoryKey() );
 			}
 		} );
+		
+		
+		controler.addOverridingQSimModule(new AbstractQSimModule() {
+            @Override
+            protected void configureQSim() {
+                bind(QNetworkFactory.class).toProvider(new Provider<QNetworkFactory>() {
+                    @Inject
+                    private EventsManager events;
+
+                    @Override
+                    public QNetworkFactory get() {
+                        final ConfigurableQNetworkFactory factory = new ConfigurableQNetworkFactory(events, scenario);
+                        factory.setLinkSpeedCalculator(new BikeLinkSpeedCalculator());
+                        return factory;
+                    }
+                });
+            }
+        });
 		
 		for ( AbstractModule overridingModule : overridingModules ) {
 			controler.addOverridingModule( overridingModule );
@@ -211,4 +237,3 @@ public class RunBerlinScenario {
 	}
 
 }
-
