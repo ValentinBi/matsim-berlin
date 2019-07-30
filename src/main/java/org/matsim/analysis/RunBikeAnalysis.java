@@ -125,5 +125,20 @@ public class RunBikeAnalysis {
 		System.out.println("End of Analysis.");
 
 	}
-	
+	/*
+	 * TODO:
+	 * time of bike riders in general
+	 * time of bike riders using the bike highways
+	 * 
+	 * distance of bike riders in general (sum and mean)
+	 * distance of bike riders using the bike highway (sum and mean)
+	 * distance travelled on bike highways (proportion to normal streets)
+	 * 
+	 * 
+	 * in Via:
+	 * Location of the bike highway users
+	 * 
+	 * if possible:
+	 * change of modal split for departure or arrival near bike highway
+	 */
 }
