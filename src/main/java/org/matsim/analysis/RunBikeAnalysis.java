@@ -51,13 +51,13 @@ public class RunBikeAnalysis {
 			}
 		}
 		AgentTravelledOnLinkEventHandler agentTravelledOnLinkEventHandler = new AgentTravelledOnLinkEventHandler(bikeHighwayLinkIds);
-
 		TravelDistanceEventHandler travelDistanceEventHandlerPolicy = new TravelDistanceEventHandler(network);
 		TravelTimeEventHandler travelTimeEventHandlerPolicy = new TravelTimeEventHandler();
 		AgentUsesLegModeEventHandler agentUsesBicycleEventHandlerPolicy = new AgentUsesLegModeEventHandler("bicycle");
 		AgentUsesLegModeEventHandler agentUsesCarEventHandlerPolicy = new AgentUsesLegModeEventHandler(TransportMode.car);
 		AgentUsesLegModeEventHandler agentUsesPtEventHandlerPolicy = new AgentUsesLegModeEventHandler(TransportMode.pt);
 		//AgentUsesLegModeEventHandler agentUsesBikeEventHandlerPolicy = new AgentUsesLegModeEventHandler(TransportMode.bike);
+		AgentUsesLegModeEventHandler agentWalksEventHandlerPolicy = new AgentUsesLegModeEventHandler("walk");
 		
 		EventsManager policyCaseManager = EventsUtils.createEventsManager();
 		policyCaseManager.addHandler(travelDistanceEventHandlerPolicy);
@@ -66,6 +66,8 @@ public class RunBikeAnalysis {
 		policyCaseManager.addHandler(agentUsesCarEventHandlerPolicy);
 		//policyCaseManager.addHandler(agentUsesBikeEventHandlerPolicy);
 		policyCaseManager.addHandler(agentUsesPtEventHandlerPolicy);
+		policyCaseManager.addHandler(agentWalksEventHandlerPolicy);
+		
 		
 
 		new MatsimEventsReader(policyCaseManager).readFile(policyCaseEventsPath.toString());
@@ -87,6 +89,7 @@ public class RunBikeAnalysis {
 		AgentUsesLegModeEventHandler agentUsesBicycleEventHandlerBase = new AgentUsesLegModeEventHandler("bicycle");
 		AgentUsesLegModeEventHandler agentUsesCarEventHandlerBase = new AgentUsesLegModeEventHandler(TransportMode.car);
 		AgentUsesLegModeEventHandler agentUsesPtEventHandlerBase = new AgentUsesLegModeEventHandler(TransportMode.pt);
+		AgentUsesLegModeEventHandler agentWalksEventHandlerBase = new AgentUsesLegModeEventHandler("walk");
 		
 		EventsManager baseCaseManager = EventsUtils.createEventsManager();
 		baseCaseManager.addHandler(agentUsesPtEventHandlerBase);
@@ -94,13 +97,17 @@ public class RunBikeAnalysis {
 		baseCaseManager.addHandler(agentUsesBicycleEventHandlerBase);
 		baseCaseManager.addHandler(travelTimeEventHandlerBase);
 		baseCaseManager.addHandler(travelDistanceEventHandlerBase);
+		baseCaseManager.addHandler(agentWalksEventHandlerBase);
 		
 
 		new MatsimEventsReader(baseCaseManager).readFile(baseCaseEventsPath.toString());
 		
+		Double bicycleRiderTravelTimePolicy = calculateTravelTimeOfSetOfAgent(agentUsesBicycleEventHandlerPolicy.getVehicleUsers(), travelTimeEventHandlerPolicy);
+		Double bicycleRiderTravelTimeBase = calculateTravelTimeOfSetOfAgent(agentUsesBicycleEventHandlerBase.getVehicleUsers(), travelTimeEventHandlerBase);
+		
+		
 
 		System.out.println("-------------------------------------------------------------------------------");
-
 		System.out.println("-------------------------------------------------------------------------------");
 		System.out.println("POLICY CASE:");
 		System.out.println("Number of bicycle riders: "+ agentUsesBicycleEventHandlerPolicy.getVehicleUsers().size());
@@ -109,6 +116,16 @@ public class RunBikeAnalysis {
 		System.out.println("Number of car legs: "+ agentUsesCarEventHandlerPolicy.getNumberOfLegs());
 		System.out.println("Number of pt users: "+ agentUsesPtEventHandlerPolicy.getVehicleUsers().size());
 		System.out.println("Number of pt legs: "+ agentUsesPtEventHandlerPolicy.getNumberOfLegs());
+		System.out.println("Number of persons who walk: "+ agentWalksEventHandlerPolicy.getVehicleUsers().size());
+		System.out.println("Number of walk legs: "+ agentWalksEventHandlerPolicy.getNumberOfLegs());
+		System.out.println("-------------------------------------------------------------------------------");
+		System.out.println("Total travel time: "+ (travelTimeEventHandlerPolicy.calculateOverallTravelTime()/3600) +" hours");
+		
+		
+		System.out.println("Total Travel time of bicycle riders: "+ bicycleRiderTravelTimePolicy/3600 +"hours" );
+		System.out.println("Mean of travel times of bicycle riders: "+ bicycleRiderTravelTimePolicy/agentUsesBicycleEventHandlerPolicy.getVehicleUsers().size()/60 +" min");
+		System.out.println("Travel times on bicycles: " );
+		
 	//	System.out.println("Number of bike drivers: "+ agentUsesBikeEventHandlerPolicy.getVehicleUsers().size());
 	//	System.out.println("Number of bike legs: "+ agentUsesBikeEventHandlerPolicy.getNumberOfLegs());
 		
@@ -122,8 +139,28 @@ public class RunBikeAnalysis {
 		System.out.println("Number of car legs: "+ agentUsesCarEventHandlerBase.getNumberOfLegs());
 		System.out.println("Number of pt users: "+ agentUsesPtEventHandlerBase.getVehicleUsers().size());
 		System.out.println("Number of pt legs: "+ agentUsesPtEventHandlerBase.getNumberOfLegs());
+		System.out.println("Number of persons who walk: "+ agentWalksEventHandlerBase.getVehicleUsers().size());
+		System.out.println("Number of walk legs: "+ agentWalksEventHandlerBase.getNumberOfLegs());
+		System.out.println("-------------------------------------------------------------------------------");
+		System.out.println("Total travel time: "+ (travelTimeEventHandlerBase.calculateOverallTravelTime()/3600) +" hours");
+		System.out.println("Mean of travel times of bicycle riders: "+ bicycleRiderTravelTimeBase/agentUsesBicycleEventHandlerBase.getVehicleUsers().size()/60 +" min");
+		System.out.println("Travel times on bicycles: " );
+		
+
+		System.out.println("-------------------------------------------------------------------------------");
+		System.out.println("-------------------------------------------------------------------------------");
 		System.out.println("End of Analysis.");
 
+	}
+	
+	private static double calculateTravelTimeOfSetOfAgent(Set<Id<Person>> persons,TravelTimeEventHandler eventHandler) {
+		Map<Id<Person>, Double> personTimeMapping = eventHandler.getTravelTimesByPerson();
+		Double timeSum = 0.;
+		for (Id<Person> person: persons) {
+			timeSum += personTimeMapping.get(person);
+		}
+		return timeSum;
+		
 	}
 	/*
 	 * TODO:
