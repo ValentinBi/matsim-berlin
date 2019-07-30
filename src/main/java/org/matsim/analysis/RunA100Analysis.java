@@ -24,7 +24,7 @@ import org.matsim.core.network.io.MatsimNetworkReader;
  * @author Aravind
  *
  */
-public class RunBerlinAnalysis {
+public class RunA100Analysis {
 
 	/**
 	 * @param args

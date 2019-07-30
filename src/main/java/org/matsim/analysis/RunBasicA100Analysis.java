@@ -18,7 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @SuppressWarnings("ALL")
-public class RunBasicAnalysis {
+public class RunBasicA100Analysis {
 	
 	public static Set<Id<Link>> getLinksFromFile(String filename){
 		BufferedReader reader;
