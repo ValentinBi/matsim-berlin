@@ -510,9 +510,9 @@ public class RunBikeAnalysis {
 		System.out.println("middle bike trips: " + middleBikeTripsPolicy);
 		System.out.println("long bike trips: " + longBikeTripsPolicy);	
 		System.out.println("-------------------------------------------------------------------------------");
-		System.out.println("short bike trips: " + shortBikeTripsBerlinPolicy);
-		System.out.println("middle bike trips: " + middleBikeTripsBerlinPolicy);
-		System.out.println("long bike trips: " + longBikeTripsBerlinPolicy);	
+		System.out.println("short bike trips for Berliners: " + shortBikeTripsBerlinPolicy);
+		System.out.println("middle bike trips for Berliners: " + middleBikeTripsBerlinPolicy);
+		System.out.println("long bike trips for Berliners: " + longBikeTripsBerlinPolicy);	
 
 		System.out.println("-------------------------------------------------------------------------------");
 		System.out.println("-------------------------------------------------------------------------------");
@@ -559,9 +559,9 @@ public class RunBikeAnalysis {
 		System.out.println("middle bike trips: " + middleBikeTripsBase);
 		System.out.println("long bike trips: " + longBikeTripsBase);
 		System.out.println("-------------------------------------------------------------------------------");
-		System.out.println("short bike trips: " + shortBikeTripsBerlinBase);
-		System.out.println("middle bike trips: " + middleBikeTripsBerlinBase);
-		System.out.println("long bike trips: " + longBikeTripsBerlinBase);	
+		System.out.println("short bike trips of Berliners: " + shortBikeTripsBerlinBase);
+		System.out.println("middle bike trips of Berliners: " + middleBikeTripsBerlinBase);
+		System.out.println("long bike trips of Berliners: " + longBikeTripsBerlinBase);	
 		System.out.println("-------------------------------------------------------------------------------");
 		System.out.println("-------------------------------------------------------------------------------");
 		System.out.println("End of Analysis.");
