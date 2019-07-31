@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,11 +63,14 @@ public class RunBikeAnalysis {
 		populationReader.readFile(planfile.toString());
 		Population population = scenario.getPopulation();
 		
-		List<? extends Plan> plans = new ArrayList<Plan>();
+		ArrayList<Plan> plans = new ArrayList<Plan>();
 		Set<Id<Person>> persons = population.getPersons().keySet();
 		for (Id<Person> person : persons) {
 			 List<? extends Plan> plansOfPerson = population.getPersons().get(person).getPlans();
-			 plans.addAll(plansOfPerson);
+			 Iterator<? extends Plan> plansOfPersonItr = plansOfPerson.iterator();
+			 while (plansOfPersonItr.hasNext()) {
+				 plans.add(plansOfPersonItr.next());
+			 }
 		}
 		Double bikeDistance = 0.;
 		for(Plan plan: plans) {
