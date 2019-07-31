@@ -77,9 +77,6 @@ public class RunBikeAnalysis {
 		
 		Set<Id<Person>> personsLivingInBerlin = population3.getPersons().keySet();
 		Set<Id<Person>> personsLivingInHundekopf = population2.getPersons().keySet();
-		System.out.println();
-		System.out.println(personsLivingInBerlin);
-		System.out.println();
 		
 		/*
 		Path listOfAddedLinksFilePath = Paths.get("./output/bicycleHighwayLinks.txt");
@@ -186,6 +183,59 @@ public class RunBikeAnalysis {
 				.filter(person -> personsLivingInBerlin.contains(person)).count();
 		int numberOfBicycleRidersLivingInBerlinBase = (int) agentUsesBicycleEventHandlerBase.getVehicleUsers().stream()
 				.filter(person -> personsLivingInBerlin.contains(person)).count();
+		int numberOfBicycleLegsOfBerlinersPolicy = 0;
+		int numberOfBicycleLegsOfBerlinersBase = 0;
+		int numberOfCarLegsOfBerlinersPolicy = 0;
+		int numberOfCarLegsOfBerlinersBase = 0;
+		int numberOfPtLegsOfBerlinersPolicy = 0;
+		int numberOfPtLegsOfBerlinersBase = 0;
+		int numberOfWalkLegsOfBerlinersPolicy = 0;
+		int numberOfWalkLegsOfBerlinersBase = 0;
+		for (Id<Person> person :personsLivingInBerlin) {
+			if(agentUsesBicycleEventHandlerPolicy.getLegsPerPerson().get(person)!=null)
+				numberOfBicycleLegsOfBerlinersPolicy += agentUsesBicycleEventHandlerPolicy.getLegsPerPerson().get(person);
+			if(agentUsesBicycleEventHandlerBase.getLegsPerPerson().get(person)!=null)
+				numberOfBicycleLegsOfBerlinersBase += agentUsesBicycleEventHandlerBase.getLegsPerPerson().get(person);
+			if(agentUsesCarEventHandlerPolicy.getLegsPerPerson().get(person)!=null)
+				numberOfCarLegsOfBerlinersPolicy += agentUsesCarEventHandlerPolicy.getLegsPerPerson().get(person);
+			if(agentUsesCarEventHandlerBase.getLegsPerPerson().get(person)!=null)
+				numberOfCarLegsOfBerlinersBase += agentUsesCarEventHandlerBase.getLegsPerPerson().get(person);
+			if(agentUsesPtEventHandlerPolicy.getLegsPerPerson().get(person)!=null)
+				numberOfPtLegsOfBerlinersPolicy += agentUsesPtEventHandlerPolicy.getLegsPerPerson().get(person);
+			if(agentUsesPtEventHandlerBase.getLegsPerPerson().get(person)!=null)
+				numberOfPtLegsOfBerlinersBase += agentUsesPtEventHandlerBase.getLegsPerPerson().get(person);
+			if(agentWalksEventHandlerPolicy.getLegsPerPerson().get(person)!=null)
+				numberOfWalkLegsOfBerlinersPolicy += agentWalksEventHandlerPolicy.getLegsPerPerson().get(person);
+			if(agentWalksEventHandlerBase.getLegsPerPerson().get(person)!=null)
+				numberOfWalkLegsOfBerlinersBase += agentWalksEventHandlerBase.getLegsPerPerson().get(person);
+		}
+		
+		int numberOfBicycleLegsOfHundekopfPolicy = 0;
+		int numberOfBicycleLegsOfHundekopfBase = 0;
+		int numberOfCarLegsOfHundekopfPolicy = 0;
+		int numberOfCarLegsOfHundekopfBase = 0;
+		int numberOfPtLegsOfHundekopfPolicy = 0;
+		int numberOfPtLegsOfHundekopfBase = 0;
+		int numberOfWalkLegsOfHundekopfPolicy = 0;
+		int numberOfWalkLegsOfHundekopfBase = 0;
+		for (Id<Person> person :personsLivingInHundekopf) {
+			if(agentUsesBicycleEventHandlerPolicy.getLegsPerPerson().get(person)!=null)
+				numberOfBicycleLegsOfHundekopfPolicy += agentUsesBicycleEventHandlerPolicy.getLegsPerPerson().get(person);
+			if( agentUsesBicycleEventHandlerBase.getLegsPerPerson().get(person)!=null)
+				numberOfBicycleLegsOfHundekopfBase += agentUsesBicycleEventHandlerBase.getLegsPerPerson().get(person);
+			if(agentUsesCarEventHandlerPolicy.getLegsPerPerson().get(person)!=null)
+				numberOfCarLegsOfHundekopfPolicy += agentUsesCarEventHandlerPolicy.getLegsPerPerson().get(person);
+			if(agentUsesCarEventHandlerBase.getLegsPerPerson().get(person)!=null)
+				numberOfCarLegsOfHundekopfBase += agentUsesCarEventHandlerBase.getLegsPerPerson().get(person);
+			if(agentUsesPtEventHandlerPolicy.getLegsPerPerson().get(person)!=null)
+				numberOfPtLegsOfHundekopfPolicy += agentUsesPtEventHandlerPolicy.getLegsPerPerson().get(person);
+			if(agentUsesPtEventHandlerBase.getLegsPerPerson().get(person)!=null)
+				numberOfPtLegsOfHundekopfBase += agentUsesPtEventHandlerBase.getLegsPerPerson().get(person);
+			if(agentWalksEventHandlerPolicy.getLegsPerPerson().get(person)!=null)
+				numberOfWalkLegsOfHundekopfPolicy += agentWalksEventHandlerPolicy.getLegsPerPerson().get(person);
+			if(agentWalksEventHandlerBase.getLegsPerPerson().get(person)!=null)
+				numberOfWalkLegsOfHundekopfBase += agentWalksEventHandlerBase.getLegsPerPerson().get(person);
+		}
 		int numberOfBicycleRidersLivingInHundekopfPolicy = (int) agentUsesBicycleEventHandlerPolicy.getVehicleUsers().stream()
 				.filter(person -> personsLivingInHundekopf.contains(person)).count();
 		int numberOfBicycleRidersLivingInHundekopfBase = (int) agentUsesBicycleEventHandlerBase.getVehicleUsers().stream()
@@ -228,18 +278,26 @@ public class RunBikeAnalysis {
 		System.out.println("Number of bicycle riders living in Berlin: "+ numberOfBicycleRidersLivingInBerlinPolicy);
 		System.out.println("Number of bicycle riders living in Hundekopf: "+ numberOfBicycleRidersLivingInHundekopfPolicy);
 		System.out.println("Number of bicycle rides: "+ agentUsesBicycleEventHandlerPolicy.getNumberOfLegs());
+		System.out.println("Number of bicycle rides of Berliners: "+ numberOfBicycleLegsOfBerlinersPolicy);
+		System.out.println("Number of bicycle rides of Hundekopfers: "+ numberOfBicycleLegsOfHundekopfPolicy);
 		System.out.println("Number of car drivers: "+ agentUsesCarEventHandlerPolicy.getVehicleUsers().size());
 		System.out.println("Number of car drivers living in Berlin: "+ numberOfCarDriversLivingInBerlinPolicy);
 		System.out.println("Number of car drivers living in Hundekopf: "+ numberOfCarDriversLivingInHundekopfPolicy);
 		System.out.println("Number of car legs: "+ agentUsesCarEventHandlerPolicy.getNumberOfLegs());
+		System.out.println("Number of car legs of Berliners: "+ numberOfCarLegsOfBerlinersPolicy);
+		System.out.println("Number of car legs of Hundekopfers: "+ numberOfCarLegsOfHundekopfPolicy);
 		System.out.println("Number of pt users: "+ agentUsesPtEventHandlerPolicy.getVehicleUsers().size());
 		System.out.println("Number of pt users living in Berlin: "+ numberOfPtUsersLivingInBerlinPolicy);
 		System.out.println("Number of pt users living in Hundekopf: "+ numberOfPtUsersLivingInHundekopfPolicy);
 		System.out.println("Number of pt legs: "+ agentUsesPtEventHandlerPolicy.getNumberOfLegs());
+		System.out.println("Number of pt legs of Berliners: "+ numberOfPtLegsOfBerlinersPolicy);
+		System.out.println("Number of pt legs of Hundekopfers: "+ numberOfPtLegsOfHundekopfPolicy);
 		System.out.println("Number of Walkers: "+ agentWalksEventHandlerPolicy.getVehicleUsers().size());
 		System.out.println("Number of Walkers living in Berlin: "+ numberOfWalkersLivingInBerlinPolicy);
 		System.out.println("Number of Walkers living in Hundekopf: "+ numberOfWalkersLivingInHundekopfPolicy);
 		System.out.println("Number of walk legs: "+ agentWalksEventHandlerPolicy.getNumberOfLegs());
+		System.out.println("Number of walk legs of Berliners: "+ numberOfWalkLegsOfBerlinersPolicy);
+		System.out.println("Number of walk legs of Hundekopfers: "+ numberOfWalkLegsOfHundekopfPolicy);
 		System.out.println("-------------------------------------------------------------------------------");
 		System.out.println("Total travel time: "+ (travelTimeEventHandlerPolicy.calculateOverallTravelTime()/3600) +" hours");
 		
@@ -261,21 +319,29 @@ public class RunBikeAnalysis {
 		System.out.println("-------------------------------------------------------------------------------");
 		System.out.println("BASE CASE:");
 		System.out.println("Number of bicycle riders: "+ agentUsesBicycleEventHandlerBase.getVehicleUsers().size());
-		System.out.println("Number of bicycle rides: "+ agentUsesBicycleEventHandlerBase.getNumberOfLegs());
 		System.out.println("Number of bicycle riders living in Berlin: "+ numberOfBicycleRidersLivingInBerlinBase);
 		System.out.println("Number of bicycle riders living in Hundekopf: "+ numberOfBicycleRidersLivingInHundekopfBase);
+		System.out.println("Number of bicycle rides: "+ agentUsesBicycleEventHandlerBase.getNumberOfLegs());
+		System.out.println("Number of bicycle rides of Berliners: "+ numberOfBicycleLegsOfBerlinersBase);
+		System.out.println("Number of bicycle rides of Hundekopfers: "+ numberOfBicycleLegsOfHundekopfBase);
 		System.out.println("Number of car drivers: "+ agentUsesCarEventHandlerBase.getVehicleUsers().size());
-		System.out.println("Number of car drivers livingin Berlin: "+ numberOfCarDriversLivingInBerlinBase);
+		System.out.println("Number of car drivers living in Berlin: "+ numberOfCarDriversLivingInBerlinBase);
 		System.out.println("Number of car drivers living in Hundekopf: "+ numberOfCarDriversLivingInHundekopfBase);
 		System.out.println("Number of car legs: "+ agentUsesCarEventHandlerBase.getNumberOfLegs());
+		System.out.println("Number of car legs of Berliners: "+ numberOfCarLegsOfBerlinersBase);
+		System.out.println("Number of car legs of Hundekopfers: "+ numberOfCarLegsOfHundekopfBase);
 		System.out.println("Number of pt users: "+ agentUsesPtEventHandlerBase.getVehicleUsers().size());
 		System.out.println("Number of pt users living in Berlin: "+ numberOfPtUsersLivingInBerlinBase);
 		System.out.println("Number of pt users living in Hundekopf: "+ numberOfPtUsersLivingInHundekopfBase);
 		System.out.println("Number of pt legs: "+ agentUsesPtEventHandlerBase.getNumberOfLegs());
+		System.out.println("Number of pt legs of Berliners: "+ numberOfPtLegsOfBerlinersBase);
+		System.out.println("Number of pt legs of Hundekopfers: "+ numberOfPtLegsOfHundekopfBase);
 		System.out.println("Number of Walkers: "+ agentWalksEventHandlerBase.getVehicleUsers().size());
 		System.out.println("Number of Walkers living in Berlin: "+ numberOfWalkersLivingInBerlinBase);
 		System.out.println("Number of Walkers living in Hundekopf: "+ numberOfWalkersLivingInHundekopfBase);
 		System.out.println("Number of walk legs: "+ agentWalksEventHandlerBase.getNumberOfLegs());
+		System.out.println("Number of walk legs of Berliners: "+ numberOfWalkLegsOfBerlinersBase);
+		System.out.println("Number of walk legs of Hundekopfers: "+ numberOfWalkLegsOfHundekopfBase);
 		System.out.println("-------------------------------------------------------------------------------");
 		System.out.println("Total travel time: "+ (travelTimeEventHandlerBase.calculateOverallTravelTime()/3600) +" hours");
 		System.out.println("Mean of travel times of bicycle riders: "+ bicycleRiderTravelTimeBase/agentUsesBicycleEventHandlerBase.getVehicleUsers().size()/60 +" min");
