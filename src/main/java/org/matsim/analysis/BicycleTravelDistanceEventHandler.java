@@ -12,7 +12,7 @@ import org.matsim.api.core.v01.events.handler.PersonArrivalEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.population.Person;
 
-public class BicycleTravelDistanceEventHandler implements PersonArrivalEventHandler, PersonDepartureEventHandler, GenericEventHandler {
+public class BicycleTravelDistanceEventHandler implements PersonDepartureEventHandler, GenericEventHandler {
 	private final Map<Id<Person>, Double> travelDistances = new HashMap<>();
 	private final Map<Id<Person>, PersonDepartureEvent> openTrips = new HashMap<Id<Person>, PersonDepartureEvent>();
 	private Double totalTravelDistance;
@@ -21,36 +21,37 @@ public class BicycleTravelDistanceEventHandler implements PersonArrivalEventHand
 		totalTravelDistance = 0.;
 	}
 	
-	public Double getTotalTravelTime() {
+	public Double getTotalTravelDistance() {
 		return totalTravelDistance;
 	}
 	
-	public Map<Id<Person>, Double> getTravelTimesByPerson(){
+	public Map<Id<Person>, Double> getTravelDistancesByPerson(){
 		return travelDistances;
 	}
 
 	@Override
 	public void handleEvent(PersonDepartureEvent event) {
-		openTrips.put(event.getPersonId(), event);
+		if(event.getLegMode().equals("bicycle")) {
+			openTrips.put(event.getPersonId(), event);
+			//System.out.println(event.getPersonId()+" hinzugefügt");
+		}
 		
 	}
 
 	@Override
-	public void handleEvent(PersonArrivalEvent event) {
-		if(openTrips.containsKey(event.getPersonId())) {
-			PersonDepartureEvent depEvent = openTrips.get(event.getPersonId());
-			Double time = event.getTime() - depEvent.getTime();
-			totalTravelDistance += time;
-			if(travelDistances.containsKey(event.getPersonId())) {
-				travelDistances.merge(event.getPersonId(), time, Double::sum);
-			}
-		}		
-	}
-
-	@Override
 	public void handleEvent(GenericEvent event) {
-		if(event.getEventType().contains("travelled")&& openTrips.containsKey(event.getAttributes().get("person"))){
-			event.getAttributes().get("distance");
+		System.out.println("GenericEvent gefunden -----------------------------");
+		if(event.getEventType().contains("travelled")) {
+			System.out.println("travelled event detected");
+			Id<Person> personId = Id.createPersonId(event.getAttributes().get("person"));
+			if(openTrips.containsKey(personId)){
+				System.out.println("travelled event zugeordnet");
+				Double distance = Double.parseDouble(event.getAttributes().get("distance"));
+				travelDistances.merge(personId, distance, Double::sum);
+				totalTravelDistance += distance;
+				openTrips.remove(personId);
+			}
 		}
+		
 	}
 }

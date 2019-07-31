@@ -29,14 +29,15 @@ public class BicycleTravelTimeEventHandler implements PersonArrivalEventHandler,
 
 	@Override
 	public void handleEvent(PersonDepartureEvent event) {
-		openTrips.put(event.getPersonId(), event);
-		
+		if(event.getLegMode().equals("bicycle")) {
+			openTrips.put(event.getPersonId(), event);
+		}
 	}
 
 	@Override
 	public void handleEvent(PersonArrivalEvent event) {
 		if(openTrips.containsKey(event.getPersonId())) {
-			PersonDepartureEvent depEvent = openTrips.get(event.getPersonId());
+			PersonDepartureEvent depEvent = openTrips.remove(event.getPersonId());
 			Double time = event.getTime() - depEvent.getTime();
 			totalTravelTime += time;
 			if(travelTimes.containsKey(event.getPersonId())) {

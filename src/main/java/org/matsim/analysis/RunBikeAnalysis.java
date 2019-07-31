@@ -53,17 +53,21 @@ public class RunBikeAnalysis {
 		Path outplanHundekopf = Paths.get("./output/bike_highways/plansHundekopf.xml.gz");
 		Path outplanBerlin = Paths.get("./output/bike_highways/plansBerlin.xml.gz");
 		
-
-		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		PopulationReader populationReader = new PopulationReader(scenario);
-		populationReader.readFile(planfile.toString());
-		Population population = scenario.getPopulation();
+		File f = new File(outplanBerlin.toString());
+		File f1 = new File(outplanHundekopf.toString());
+		if(!f.exists() || !f1.exists()) { 
+			Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+			PopulationReader populationReader = new PopulationReader(scenario);
+			populationReader.readFile(planfile.toString());
+			Population population = scenario.getPopulation();
+			
+			Map<String, Geometry> hundekopf = readShapeFile(shapeHundekopf.toString());
+			Map<String, Geometry> berlin = readShapeFile(shapeBerlin.toString());
+			
+			createNewPopulation(outplanHundekopf.toString(), hundekopf, population);
+			createNewPopulation(outplanBerlin.toString(), berlin, population);
+		}
 		
-		Map<String, Geometry> hundekopf = readShapeFile(shapeHundekopf.toString());
-		Map<String, Geometry> berlin = readShapeFile(shapeBerlin.toString());
-		
-		createNewPopulation(outplanHundekopf.toString(), hundekopf, population);
-		createNewPopulation(outplanBerlin.toString(), berlin, population);
 		
 		Scenario scenario2 = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		PopulationReader populationReader2 = new PopulationReader(scenario2);
@@ -114,6 +118,7 @@ public class RunBikeAnalysis {
 		AgentUsesLegModeEventHandler agentUsesPtEventHandlerPolicy = new AgentUsesLegModeEventHandler(TransportMode.pt);
 		//AgentUsesLegModeEventHandler agentUsesBikeEventHandlerPolicy = new AgentUsesLegModeEventHandler(TransportMode.bike);
 		AgentUsesLegModeEventHandler agentWalksEventHandlerPolicy = new AgentUsesLegModeEventHandler("walk");
+		BicycleTravelDistanceEventHandler bicycleTravelDistanceEventHandlerPolicy = new BicycleTravelDistanceEventHandler();
 		
 		EventsManager policyCaseManager = EventsUtils.createEventsManager();
 		// policyCaseManager.addHandler(agentTravelledOnLinkEventHandler);
@@ -124,6 +129,7 @@ public class RunBikeAnalysis {
 		policyCaseManager.addHandler(agentUsesPtEventHandlerPolicy);
 		policyCaseManager.addHandler(agentWalksEventHandlerPolicy);
 		policyCaseManager.addHandler(bicycleTravelTimeEventHandlerPolicy);
+		policyCaseManager.addHandler(bicycleTravelDistanceEventHandlerPolicy);
 		
 		
 
@@ -148,6 +154,7 @@ public class RunBikeAnalysis {
 		AgentUsesLegModeEventHandler agentUsesCarEventHandlerBase = new AgentUsesLegModeEventHandler(TransportMode.car);
 		AgentUsesLegModeEventHandler agentUsesPtEventHandlerBase = new AgentUsesLegModeEventHandler(TransportMode.pt);
 		AgentUsesLegModeEventHandler agentWalksEventHandlerBase = new AgentUsesLegModeEventHandler("walk");
+		BicycleTravelDistanceEventHandler bicycleTravelDistanceEventHandlerBase = new BicycleTravelDistanceEventHandler();
 		
 		EventsManager baseCaseManager = EventsUtils.createEventsManager();
 		baseCaseManager.addHandler(agentUsesPtEventHandlerBase);
@@ -157,6 +164,7 @@ public class RunBikeAnalysis {
 		baseCaseManager.addHandler(travelDistanceEventHandlerBase);
 		baseCaseManager.addHandler(agentWalksEventHandlerBase);
 		baseCaseManager.addHandler(bicycleTravelTimeEventHandlerBase);
+		baseCaseManager.addHandler(bicycleTravelDistanceEventHandlerBase);
 		
 
 		new MatsimEventsReader(baseCaseManager).readFile(baseCaseEventsPath.toString());
@@ -300,8 +308,6 @@ public class RunBikeAnalysis {
 		System.out.println("Number of walk legs of Hundekopfers: "+ numberOfWalkLegsOfHundekopfPolicy);
 		System.out.println("-------------------------------------------------------------------------------");
 		System.out.println("Total travel time: "+ (travelTimeEventHandlerPolicy.calculateOverallTravelTime()/3600) +" hours");
-		
-		
 		System.out.println("Total Travel time of bicycle riders: "+ bicycleRiderTravelTimePolicy/3600 +"hours" );
 		System.out.println("Mean of travel times of bicycle riders: "+ bicycleRiderTravelTimePolicy/agentUsesBicycleEventHandlerPolicy.getVehicleUsers().size()/60 +" min");
 		System.out.println("Travel times on bicycles: " + bicycleTravelTimeEventHandlerPolicy.getTotalTravelTime()/(3600) + " hours" );
@@ -310,9 +316,8 @@ public class RunBikeAnalysis {
 		System.out.println("-------------------------------------------------------------------------------");
 		System.out.println("Total travel distance: "+ (travelDistanceEventHandlerPolicy.getTotalTravelDistance() / 1000) +" km");
 		System.out.println("Mean of travel distance of bicycle riders: "+ bicycleRiderTravelDistancePolicy/agentUsesBicycleEventHandlerPolicy.getVehicleUsers().size()/1000 +" km");
+		System.out.println("Travel distance of bicycle rides: "+ bicycleTravelDistanceEventHandlerPolicy.getTotalTravelDistance()/1000 +" km");
 	//	System.out.println("Travel distance for people using the bike highways: " + ridersOnHighwayTotalTravelDistancePolicy / 1000 + " km");
-	//	System.out.println("Number of bike drivers: "+ agentUsesBikeEventHandlerPolicy.getVehicleUsers().size());
-	//	System.out.println("Number of bike legs: "+ agentUsesBikeEventHandlerPolicy.getNumberOfLegs());
 		
 
 		System.out.println("-------------------------------------------------------------------------------");
@@ -351,6 +356,7 @@ public class RunBikeAnalysis {
 		System.out.println("-------------------------------------------------------------------------------");
 		System.out.println("Total travel distance: "+ (travelDistanceEventHandlerBase.getTotalTravelDistance() / 1000) +" km");
 		System.out.println("Mean of travel distance of bicycle riders: "+ bicycleRiderTravelDistanceBase/agentUsesBicycleEventHandlerBase.getVehicleUsers().size()/1000 +" km");
+		System.out.println("Travel distance of bicycle rides: "+ bicycleTravelDistanceEventHandlerBase.getTotalTravelDistance()/1000 +" km");
 		// System.out.println("Travel distance for people using the bike highways: " + ridersOnHighwayTotalTravelDistanceBase / 1000 + " km");
 		System.out.println("-------------------------------------------------------------------------------");
 		System.out.println("-------------------------------------------------------------------------------");
@@ -438,20 +444,4 @@ public class RunBikeAnalysis {
 
         new PopulationWriter(outPopulation).write(outputPlans);
 	}
-
-	/*
-	 * TODO:
-	 * time of bike riders using the bike highways
-	 * 
-	 * distance of bike riders in general (sum and mean)
-	 * distance of bike riders using the bike highway (sum and mean)
-	 * distance travelled on bike highways (proportion to normal streets)
-	 * 
-	 * 
-	 * in Via:
-	 * Location of the bike highway users
-	 * 
-	 * if possible:
-	 * change of modal split for departure or arrival near bike highway
-	 */
 }
