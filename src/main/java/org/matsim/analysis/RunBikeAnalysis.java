@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,6 +34,7 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
+import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
@@ -53,20 +55,36 @@ public class RunBikeAnalysis {
 		Path outplanHundekopf = Paths.get("./output/bike_highways/plansHundekopf.xml.gz");
 		Path outplanBerlin = Paths.get("./output/bike_highways/plansBerlin.xml.gz");
 		
+		
+
+		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+		PopulationReader populationReader = new PopulationReader(scenario);
+		populationReader.readFile(planfile.toString());
+		Population population = scenario.getPopulation();
+		
+		List<? extends Plan> plans = new ArrayList<Plan>();
+		Set<Id<Person>> persons = population.getPersons().keySet();
+		for (Id<Person> person : persons) {
+			 List<? extends Plan> plansOfPerson = population.getPersons().get(person).getPlans();
+			 plans.addAll(plansOfPerson);
+		}
+		Double bikeDistance = 0.;
+		for(Plan plan: plans) {
+			PopulationUtils.getLegs(plan).stream()
+			.filter(leg -> leg.getMode().equals("bicycle"))
+			.mapToDouble((leg)-> leg.getRoute().getDistance());
+		}
+		
 		File f = new File(outplanBerlin.toString());
 		File f1 = new File(outplanHundekopf.toString());
 		if(!f.exists() || !f1.exists()) { 
-			Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-			PopulationReader populationReader = new PopulationReader(scenario);
-			populationReader.readFile(planfile.toString());
-			Population population = scenario.getPopulation();
-			
 			Map<String, Geometry> hundekopf = readShapeFile(shapeHundekopf.toString());
 			Map<String, Geometry> berlin = readShapeFile(shapeBerlin.toString());
 			
 			createNewPopulation(outplanHundekopf.toString(), hundekopf, population);
 			createNewPopulation(outplanBerlin.toString(), berlin, population);
 		}
+		
 		
 		
 		Scenario scenario2 = ScenarioUtils.createScenario(ConfigUtils.createConfig());
@@ -361,7 +379,6 @@ public class RunBikeAnalysis {
 		System.out.println("-------------------------------------------------------------------------------");
 		System.out.println("-------------------------------------------------------------------------------");
 		System.out.println("End of Analysis.");
-
 	}
 	
 	private static double calculateTravelTimeOfSetOfAgents(Set<Id<Person>> persons,TravelTimeEventHandler eventHandler) {
