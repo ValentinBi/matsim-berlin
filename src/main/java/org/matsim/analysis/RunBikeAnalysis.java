@@ -173,13 +173,24 @@ public class RunBikeAnalysis {
 				 plansPolicyBerlin.add(plansOfPersonItr.next());
 			 }
 		}
-
+		
 		Double bikeDistanceBerlinPolicy = 0.;
+		int shortBikeTripsBerlinPolicy = 0;
+		int middleBikeTripsBerlinPolicy = 0;
+		int longBikeTripsBerlinPolicy = 0;
 		for(Plan plan: plansPolicyBerlin) {
 			List<Leg> legs = PopulationUtils.getLegs(plan);
 			for(Leg leg: legs) {
 				if (leg.getMode().equals("bicycle")) {
-					bikeDistanceBerlinPolicy += leg.getRoute().getDistance();
+					Double distance = leg.getRoute().getDistance();
+					bikeDistanceBerlinPolicy += distance;
+					if(distance<2000) {
+						shortBikeTripsBerlinPolicy ++;
+					} else if (distance<5000) {
+						middleBikeTripsBerlinPolicy ++;
+					} else {
+						longBikeTripsBerlinPolicy ++;
+					}
 				}
 			}
 		}
@@ -195,11 +206,22 @@ public class RunBikeAnalysis {
 		}
 
 		Double bikeDistanceBerlinBase = 0.;
+		int shortBikeTripsBerlinBase = 0;
+		int middleBikeTripsBerlinBase = 0;
+		int longBikeTripsBerlinBase = 0;
 		for(Plan plan: plansBaseBerlin) {
 			List<Leg> legs = PopulationUtils.getLegs(plan);
 			for(Leg leg: legs) {
 				if (leg.getMode().equals("bicycle")) {
-					bikeDistanceBerlinBase += leg.getRoute().getDistance();
+					Double distance = leg.getRoute().getDistance();
+					bikeDistanceBerlinBase += distance;
+					if(distance<2000) {
+						shortBikeTripsBerlinBase ++;
+					} else if (distance<5000) {
+						middleBikeTripsBerlinBase ++;
+					} else {
+						longBikeTripsBerlinBase ++;
+					}
 				}
 			}
 		}
@@ -236,7 +258,7 @@ public class RunBikeAnalysis {
 		}
 
 		Double bikeDistanceHundekopfBase = 0.;
-		for(Plan plan: plansBaseBerlin) {
+		for(Plan plan: plansBaseHundekopf) {
 			List<Leg> legs = PopulationUtils.getLegs(plan);
 			for(Leg leg: legs) {
 				if (leg.getMode().equals("bicycle")) {
@@ -487,6 +509,10 @@ public class RunBikeAnalysis {
 		System.out.println("short bike trips: " + shortBikeTripsPolicy);
 		System.out.println("middle bike trips: " + middleBikeTripsPolicy);
 		System.out.println("long bike trips: " + longBikeTripsPolicy);	
+		System.out.println("-------------------------------------------------------------------------------");
+		System.out.println("short bike trips: " + shortBikeTripsBerlinPolicy);
+		System.out.println("middle bike trips: " + middleBikeTripsBerlinPolicy);
+		System.out.println("long bike trips: " + longBikeTripsBerlinPolicy);	
 
 		System.out.println("-------------------------------------------------------------------------------");
 		System.out.println("-------------------------------------------------------------------------------");
@@ -531,7 +557,11 @@ public class RunBikeAnalysis {
 		System.out.println("-------------------------------------------------------------------------------");
 		System.out.println("short bike trips: " + shortBikeTripsBase);
 		System.out.println("middle bike trips: " + middleBikeTripsBase);
-		System.out.println("long bike trips: " + longBikeTripsBase);		
+		System.out.println("long bike trips: " + longBikeTripsBase);
+		System.out.println("-------------------------------------------------------------------------------");
+		System.out.println("short bike trips: " + shortBikeTripsBerlinBase);
+		System.out.println("middle bike trips: " + middleBikeTripsBerlinBase);
+		System.out.println("long bike trips: " + longBikeTripsBerlinBase);	
 		System.out.println("-------------------------------------------------------------------------------");
 		System.out.println("-------------------------------------------------------------------------------");
 		System.out.println("End of Analysis.");
