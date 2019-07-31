@@ -23,6 +23,7 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
@@ -53,6 +54,7 @@ public class RunBikeAnalysis {
 		//Path shapeBerlin = Paths.get("./input/shapefiles/Bezirksgrenzen/bezirksgrenzen.shp");
 		Path shapeBerlin = Paths.get("./input/shapefiles/Bezirke/Bezirke_GK4.shp");
 		Path planfile = Paths.get("./output/bike_highways/berlin-v5.3-1pct-bike_highways.output_plans.xml.gz");
+		Path planfileBase = Paths.get("./output/bike_basecase/berlin-v5.3-1pct-bike_basecase.output_plans.xml.gz");
 		Path outplanHundekopf = Paths.get("./output/bike_highways/plansHundekopf.xml.gz");
 		Path outplanBerlin = Paths.get("./output/bike_highways/plansBerlin.xml.gz");
 		
@@ -65,19 +67,76 @@ public class RunBikeAnalysis {
 		
 		ArrayList<Plan> plans = new ArrayList<Plan>();
 		Set<Id<Person>> persons = population.getPersons().keySet();
+		System.out.println("Persons size: "+persons.size());
 		for (Id<Person> person : persons) {
 			 List<? extends Plan> plansOfPerson = population.getPersons().get(person).getPlans();
+				//System.out.println("PersonPlans size: "+plansOfPerson.size());
 			 Iterator<? extends Plan> plansOfPersonItr = plansOfPerson.iterator();
 			 while (plansOfPersonItr.hasNext()) {
 				 plans.add(plansOfPersonItr.next());
 			 }
 		}
-		Double bikeDistance = 0.;
+
+		Double bikeDistancePolicy = 0.;
+		int shortBikeTripsPolicy = 0;
+		int middleBikeTripsPolicy = 0;
+		int longBikeTripsPolicy = 0;
+		int legcounter = 0;
 		for(Plan plan: plans) {
-			PopulationUtils.getLegs(plan).stream()
-			.filter(leg -> leg.getMode().equals("bicycle"))
-			.mapToDouble((leg)-> leg.getRoute().getDistance());
+			List<Leg> legs = PopulationUtils.getLegs(plan);
+			
+			for(Leg leg: legs) {
+				legcounter ++;
+				if (leg.getMode().equals("bicycle")) {
+					Double distance = leg.getRoute().getDistance();
+					bikeDistancePolicy += distance;
+					if(distance<2000) {
+						shortBikeTripsPolicy ++;
+					} else if (distance<5000) {
+						middleBikeTripsPolicy ++;
+					} else {
+						longBikeTripsPolicy ++;
+					}
+				}
+			}
 		}
+		System.out.println("Legs size: "+legcounter);
+
+		Scenario scenario1 = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+		PopulationReader populationReader1 = new PopulationReader(scenario1);
+		populationReader1.readFile(planfileBase.toString());
+		Population populationBase = scenario1.getPopulation();
+		
+		ArrayList<Plan> plansBase = new ArrayList<Plan>();
+		Set<Id<Person>> personsBase = populationBase.getPersons().keySet();
+		for (Id<Person> person : personsBase) {
+			 List<? extends Plan> plansOfPerson = populationBase.getPersons().get(person).getPlans();
+			 Iterator<? extends Plan> plansOfPersonItr = plansOfPerson.iterator();
+			 while (plansOfPersonItr.hasNext()) {
+				 plansBase.add(plansOfPersonItr.next());
+			 }
+		}
+		Double bikeDistanceBase = 0.;
+		int shortBikeTripsBase = 0;
+		int middleBikeTripsBase = 0;
+		int longBikeTripsBase = 0;
+		for(Plan plan: plansBase) {
+			List<Leg> legs = PopulationUtils.getLegs(plan);
+			for(Leg leg: legs) {
+				if (leg.getMode().equals("bicycle")) {
+					Double distance = leg.getRoute().getDistance();
+					bikeDistanceBase += distance;
+					if(distance<2000) {
+						shortBikeTripsBase ++;
+					} else if (distance<5000) {
+						middleBikeTripsBase ++;
+					} else {
+						longBikeTripsBase ++;
+					}
+				}
+			}
+		}
+		
 		
 		File f = new File(outplanBerlin.toString());
 		File f1 = new File(outplanHundekopf.toString());
@@ -104,6 +163,87 @@ public class RunBikeAnalysis {
 		Set<Id<Person>> personsLivingInBerlin = population3.getPersons().keySet();
 		Set<Id<Person>> personsLivingInHundekopf = population2.getPersons().keySet();
 		
+		ArrayList<Plan> plansPolicyBerlin = new ArrayList<Plan>();
+		//System.out.println("Person size: "+persons.size());
+		for (Id<Person> person : personsLivingInBerlin) {
+			 List<? extends Plan> plansOfPerson = population.getPersons().get(person).getPlans();
+				//System.out.println("PersonPlans size: "+plansOfPerson.size());
+			 Iterator<? extends Plan> plansOfPersonItr = plansOfPerson.iterator();
+			 while (plansOfPersonItr.hasNext()) {
+				 plansPolicyBerlin.add(plansOfPersonItr.next());
+			 }
+		}
+
+		Double bikeDistanceBerlinPolicy = 0.;
+		for(Plan plan: plansPolicyBerlin) {
+			List<Leg> legs = PopulationUtils.getLegs(plan);
+			for(Leg leg: legs) {
+				if (leg.getMode().equals("bicycle")) {
+					bikeDistanceBerlinPolicy += leg.getRoute().getDistance();
+				}
+			}
+		}
+
+		ArrayList<Plan> plansBaseBerlin = new ArrayList<Plan>();
+		for (Id<Person> person : personsLivingInBerlin) {
+			 List<? extends Plan> plansOfPerson = populationBase.getPersons().get(person).getPlans();
+				//System.out.println("PersonPlans size: "+plansOfPerson.size());
+			 Iterator<? extends Plan> plansOfPersonItr = plansOfPerson.iterator();
+			 while (plansOfPersonItr.hasNext()) {
+				 plansBaseBerlin.add(plansOfPersonItr.next());
+			 }
+		}
+
+		Double bikeDistanceBerlinBase = 0.;
+		for(Plan plan: plansBaseBerlin) {
+			List<Leg> legs = PopulationUtils.getLegs(plan);
+			for(Leg leg: legs) {
+				if (leg.getMode().equals("bicycle")) {
+					bikeDistanceBerlinBase += leg.getRoute().getDistance();
+				}
+			}
+		}
+		
+		ArrayList<Plan> plansPolicyHundekopf = new ArrayList<Plan>();
+		//System.out.println("Person size: "+persons.size());
+		for (Id<Person> person : personsLivingInHundekopf) {
+			 List<? extends Plan> plansOfPerson = population.getPersons().get(person).getPlans();
+				//System.out.println("PersonPlans size: "+plansOfPerson.size());
+			 Iterator<? extends Plan> plansOfPersonItr = plansOfPerson.iterator();
+			 while (plansOfPersonItr.hasNext()) {
+				 plansPolicyHundekopf.add(plansOfPersonItr.next());
+			 }
+		}
+
+		Double bikeDistanceHundekopfPolicy = 0.;
+		for(Plan plan: plansPolicyHundekopf) {
+			List<Leg> legs = PopulationUtils.getLegs(plan);
+			for(Leg leg: legs) {
+				if (leg.getMode().equals("bicycle")) {
+					bikeDistanceHundekopfPolicy += leg.getRoute().getDistance();
+				}
+			}
+		}
+
+		ArrayList<Plan> plansBaseHundekopf = new ArrayList<Plan>();
+		for (Id<Person> person : personsLivingInHundekopf) {
+			 List<? extends Plan> plansOfPerson = populationBase.getPersons().get(person).getPlans();
+				//System.out.println("PersonPlans size: "+plansOfPerson.size());
+			 Iterator<? extends Plan> plansOfPersonItr = plansOfPerson.iterator();
+			 while (plansOfPersonItr.hasNext()) {
+				 plansBaseHundekopf.add(plansOfPersonItr.next());
+			 }
+		}
+
+		Double bikeDistanceHundekopfBase = 0.;
+		for(Plan plan: plansBaseBerlin) {
+			List<Leg> legs = PopulationUtils.getLegs(plan);
+			for(Leg leg: legs) {
+				if (leg.getMode().equals("bicycle")) {
+					bikeDistanceHundekopfBase += leg.getRoute().getDistance();
+				}
+			}
+		}
 		/*
 		Path listOfAddedLinksFilePath = Paths.get("./output/bicycleHighwayLinks.txt");
 		File listOfAddedLinks = new File(listOfAddedLinksFilePath.toString());
@@ -338,9 +478,15 @@ public class RunBikeAnalysis {
 		System.out.println("-------------------------------------------------------------------------------");
 		System.out.println("Total travel distance: "+ (travelDistanceEventHandlerPolicy.getTotalTravelDistance() / 1000) +" km");
 		System.out.println("Mean of travel distance of bicycle riders: "+ bicycleRiderTravelDistancePolicy/agentUsesBicycleEventHandlerPolicy.getVehicleUsers().size()/1000 +" km");
-		System.out.println("Travel distance of bicycle rides: "+ bicycleTravelDistanceEventHandlerPolicy.getTotalTravelDistance()/1000 +" km");
+		System.out.println("Bicycle distance: "+ bikeDistancePolicy/1000 + " km");
+		System.out.println("Bicycle distance of Berliners: "+ bikeDistanceBerlinPolicy/1000 + " km");
+		System.out.println("Bicycle distance of Hundekopfers: "+ bikeDistanceHundekopfPolicy/1000 + " km");
 	//	System.out.println("Travel distance for people using the bike highways: " + ridersOnHighwayTotalTravelDistancePolicy / 1000 + " km");
-		
+
+		System.out.println("-------------------------------------------------------------------------------");
+		System.out.println("short bike trips: " + shortBikeTripsPolicy);
+		System.out.println("middle bike trips: " + middleBikeTripsPolicy);
+		System.out.println("long bike trips: " + longBikeTripsPolicy);	
 
 		System.out.println("-------------------------------------------------------------------------------");
 		System.out.println("-------------------------------------------------------------------------------");
@@ -378,8 +524,14 @@ public class RunBikeAnalysis {
 		System.out.println("-------------------------------------------------------------------------------");
 		System.out.println("Total travel distance: "+ (travelDistanceEventHandlerBase.getTotalTravelDistance() / 1000) +" km");
 		System.out.println("Mean of travel distance of bicycle riders: "+ bicycleRiderTravelDistanceBase/agentUsesBicycleEventHandlerBase.getVehicleUsers().size()/1000 +" km");
-		System.out.println("Travel distance of bicycle rides: "+ bicycleTravelDistanceEventHandlerBase.getTotalTravelDistance()/1000 +" km");
 		// System.out.println("Travel distance for people using the bike highways: " + ridersOnHighwayTotalTravelDistanceBase / 1000 + " km");
+		System.out.println("Bicycle distance: "+ bikeDistanceBase/1000 + " km");
+		System.out.println("Bicycle distance of Berliners: "+ bikeDistanceBerlinBase/1000 + " km");
+		System.out.println("Bicycle distance of Hundekopfers: "+ bikeDistanceHundekopfBase/1000 + " km");
+		System.out.println("-------------------------------------------------------------------------------");
+		System.out.println("short bike trips: " + shortBikeTripsBase);
+		System.out.println("middle bike trips: " + middleBikeTripsBase);
+		System.out.println("long bike trips: " + longBikeTripsBase);		
 		System.out.println("-------------------------------------------------------------------------------");
 		System.out.println("-------------------------------------------------------------------------------");
 		System.out.println("End of Analysis.");
